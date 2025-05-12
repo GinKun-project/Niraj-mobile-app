@@ -7,6 +7,8 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +67,6 @@ class LoginScreen extends StatelessWidget {
                 onPressed: () {
                   // Handle login logic here
                 },
-                child: Text('LOG IN'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFB35D32), // Corrected property
                   padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
@@ -74,6 +75,7 @@ class LoginScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                child: Text('LOG IN'),
               ),
               SizedBox(height: 20),
               // Create an account link

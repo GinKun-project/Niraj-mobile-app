@@ -6,6 +6,8 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  SignUpScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +80,6 @@ class SignUpScreen extends StatelessWidget {
                 onPressed: () {
                   // Handle sign-up logic here
                 },
-                child: Text('SIGN UP'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFB35D32), // Corrected property
                   padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
@@ -87,6 +88,7 @@ class SignUpScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                child: Text('SIGN UP'),
               ),
               SizedBox(height: 20),
               // Already have an account link

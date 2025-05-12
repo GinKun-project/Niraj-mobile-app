@@ -1,46 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:shadow_clash/ui/battle_screen.dart';
+import 'package:shadow_clash/ui/battle_screen.dart'; // adjust path if needed
 
 class CharacterSelectScreen extends StatelessWidget {
-  // You can later replace these with dynamic character data
   final List<String> characters = ['Warrior', 'Mage', 'Assassin', 'Tank'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF2E1A1A),
+      backgroundColor: const Color(0xFF2E1A1A),
       appBar: AppBar(
-        title: Text('Select Your Character'),
-        backgroundColor: Color(0xFFB35D32),
+        title: const Text('Select Your Character'),
+        backgroundColor: const Color(0xFFB35D32),
       ),
-      body: Center(
-        child: ListView.builder(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.builder(
           itemCount: characters.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 3 / 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
           itemBuilder: (context, index) {
-            return Card(
-              color: Colors.black,
-              margin: EdgeInsets.all(15),
-              child: ListTile(
-                title: Text(
-                  characters[index],
-                  style: TextStyle(color: Colors.white),
+            final character = characters[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BattleScreen(character: character),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white),
                 ),
-                leading: Icon(
-                  Icons
-                      .sports_esports, // You can later add character images here
-                  color: Colors.white,
-                ),
-                onTap: () {
-                  // Navigate to Battle Screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              BattleScreen(character: characters[index]),
+                child: Center(
+                  child: Text(
+                    character,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             );
           },
