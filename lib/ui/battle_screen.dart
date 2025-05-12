@@ -1,4 +1,4 @@
-import 'dart:async'; // ✅ Required for Timer
+import 'dart:async' as dart_async;
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame/game.dart';
@@ -10,7 +10,6 @@ class BattleGame extends FlameGame {
   late SpriteAnimation _punchingAnimation;
   late SpriteAnimationComponent _character;
 
-  // Player and AI stats
   double playerHealth = 100.0;
   double playerEnergy = 50.0;
   double aiHealth = 100.0;
@@ -123,7 +122,7 @@ class BattleScreen extends StatefulWidget {
 
 class _BattleScreenState extends State<BattleScreen> {
   late BattleGame _game;
-  Timer? _aiTimer; // ✅ Null-safe Timer
+  dart_async.Timer? _aiTimer;
 
   @override
   void initState() {
@@ -133,7 +132,7 @@ class _BattleScreenState extends State<BattleScreen> {
   }
 
   void _startAITimer() {
-    _aiTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+    _aiTimer = dart_async.Timer.periodic(const Duration(seconds: 2), (timer) {
       setState(() {
         _game.simulateAIAction();
       });
@@ -142,7 +141,7 @@ class _BattleScreenState extends State<BattleScreen> {
 
   @override
   void dispose() {
-    _aiTimer?.cancel(); // ✅ Cancel safely with null check
+    _aiTimer?.cancel();
     super.dispose();
   }
 
