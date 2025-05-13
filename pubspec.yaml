@@ -24,12 +24,12 @@ flutter:
   uses-material-design: true
 
   # Add your assets (images and icons)
-  assets:
-    - assets/images/
-    - assets/icons/
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
 
   # Fonts section
-  fonts:
-    - family: RobotoMono
-      fonts:
-        - asset: fonts/RobotoMono-Regular.ttf
+  # fonts:
+  #   - family: RobotoMono
+  #     fonts:
+  #       - asset: fonts/RobotoMono-Regular.ttf

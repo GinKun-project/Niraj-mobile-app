@@ -1,6 +1,5 @@
 import 'dart:async' as dart_async;
 import 'package:flame/components.dart';
-import 'package:flame/sprite.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
@@ -147,22 +146,32 @@ class _BattleScreenState extends State<BattleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen size to manage the game layout for landscape mode
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFF2E1A1A),
       appBar: AppBar(
         title: Text('${widget.character} Battle'),
         backgroundColor: const Color(0xFFB35D32),
       ),
-      body: Column(
-        children: [
-          Expanded(child: GameWidget(game: _game)),
-          const SizedBox(height: 10),
-          _buildStatusBar("Health", _game.playerHealth, Colors.green),
-          const SizedBox(height: 10),
-          _buildStatusBar("Energy", _game.playerEnergy, Colors.blue),
-          const SizedBox(height: 20),
-          _buildActionButtons(),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              // Ensure the game takes full width for landscape
+              Expanded(child: GameWidget(game: _game)),
+
+              // Dynamically adjusting the layout based on screen size
+              _buildStatusBar("Health", _game.playerHealth, Colors.green),
+              const SizedBox(height: 10),
+              _buildStatusBar("Energy", _game.playerEnergy, Colors.blue),
+              const SizedBox(height: 20),
+              _buildActionButtons(screenWidth),
+            ],
+          );
+        },
       ),
     );
   }
@@ -197,7 +206,7 @@ class _BattleScreenState extends State<BattleScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(double screenWidth) {
     return Column(
       children: [
         ElevatedButton(

@@ -4,6 +4,7 @@ import 'package:shadow_clash/ui/battle_screen.dart'; // adjust path if needed
 class CharacterSelectScreen extends StatelessWidget {
   final List<String> characters = ['Warrior', 'Mage', 'Assassin', 'Tank'];
 
+  // Removed `const` here as it contains dynamic content
   @override
   Widget build(BuildContext context) {
     return Scaffold(
