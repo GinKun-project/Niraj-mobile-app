@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_clash/ui/login_screen.dart';
+import 'package:shadow_clash/ui/game_dashboard.dart';
 import 'package:shadow_clash/ui/character_select_screen.dart';
 import 'package:shadow_clash/ui/sign_up_screen.dart';
 import 'package:shadow_clash/ui/splash_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // Removed const constructor here to keep consistent
   const MyApp({super.key});
 
   @override
@@ -17,12 +17,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shadow Clash',
       theme: ThemeData(primarySwatch: Colors.red),
-      initialRoute: '/splash', // Start with splash screen
+      initialRoute: '/splash',
       routes: {
-        '/splash': (context) => SplashScreen(),
+        '/splash': (context) => const SplashScreen(),
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
         '/character_select': (context) => CharacterSelectScreen(),
+        '/game_dashboard': (context) => const GameDashboardScreen(),
+        // Add arcade_mode and local_multiplayer routes when ready
       },
     );
   }

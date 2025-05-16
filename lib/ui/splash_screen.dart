@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
-  int _dotCount = 3;
+  final int _dotCount = 3;
   int _currentDot = 0;
   late Timer _dotTimer;
 

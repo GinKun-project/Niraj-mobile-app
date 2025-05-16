@@ -1,17 +1,71 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shadow_clash/ui/sign_up_screen.dart'; // Importing the sign-up screen
+import 'package:http/http.dart' as http;
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  LoginScreen({super.key});
+  Future<void> loginUser() async {
+    final username = usernameController.text.trim();
+    final password = passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in both fields')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Replace this with your backend URL!
+      // For Android emulator localhost backend is at 10.0.2.2
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:5000/api/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        // Login success
+        final data = jsonDecode(response.body);
+        // TODO: You can save token here if backend sends one: data['token']
+
+        Navigator.pushReplacementNamed(context, '/game_dashboard');
+      } else {
+        final errorData = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorData['message'] ?? 'Login failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/fight.png'),
             fit: BoxFit.cover,
@@ -19,37 +73,31 @@ class LoginScreen extends StatelessWidget {
         ),
         child: Center(
           child: SingleChildScrollView(
-            // Ensures content is scrollable on small screens
             child: Container(
               width: 350,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white),
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.black.withOpacity(
-                  0.5,
-                ), // Semi-transparent background for form
+                color: Colors.black.withOpacity(0.5),
               ),
               child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Centering content
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'SHADOW CLASH',
                     style: TextStyle(
                       fontSize: 50,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'RobotoMono', // Pixel style font
+                      fontFamily: 'RobotoMono',
                     ),
                   ),
-                  SizedBox(height: 80),
-
-                  // Username input field
+                  const SizedBox(height: 80),
                   TextField(
                     controller: usernameController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
                       labelText: 'Username',
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
@@ -59,14 +107,12 @@ class LoginScreen extends StatelessWidget {
                       border: InputBorder.none,
                     ),
                   ),
-                  SizedBox(height: 20),
-
-                  // Password input field
+                  const SizedBox(height: 20),
                   TextField(
                     controller: passwordController,
                     obscureText: true,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
@@ -76,44 +122,30 @@ class LoginScreen extends StatelessWidget {
                       border: InputBorder.none,
                     ),
                   ),
-                  SizedBox(height: 40),
-
-                  // Log In button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (usernameController.text.isEmpty ||
-                          passwordController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please fill in both fields')),
-                        );
-                      } else {
-                        print("Logging in...");
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFB35D32),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 100,
-                        vertical: 15,
+                  const SizedBox(height: 40),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                        onPressed: loginUser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB35D32),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 100,
+                            vertical: 15,
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        child: const Text('LOG IN'),
                       ),
-                      textStyle: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child: Text('LOG IN'),
-                  ),
-                  SizedBox(height: 20),
-
-                  // Create an account link
+                  const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUpScreen()),
-                      );
+                      Navigator.pushNamed(context, '/signup');
                     },
-                    child: Text(
+                    child: const Text(
                       'Create an account',
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
