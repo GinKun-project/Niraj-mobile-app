@@ -14,7 +14,7 @@ class GameDashboardScreen extends StatelessWidget {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Background image (fills the screen)
+          // Background image
           Positioned.fill(
             child: Image.asset(
               'assets/images/dashboard_bg.jpg',
