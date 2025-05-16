@@ -97,11 +97,13 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo (replace with your own image or widget)
-                  Icon(
-                    Icons.shield_moon_rounded,
-                    size: 120,
-                    color: Colors.white,
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
+
                   const SizedBox(height: 24),
                   Text(
                     'Welcome to Shadow Clash',
