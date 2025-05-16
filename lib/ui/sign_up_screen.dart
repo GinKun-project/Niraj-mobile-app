@@ -1,23 +1,83 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  bool _isLoading = false;
 
-  SignUpScreen({super.key});
+  Future<void> signUpUser() async {
+    final username = usernameController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Replace with your backend signup endpoint URL here!
+      final response = await http.post(
+        Uri.parse(
+          'http://10.0.2.2:5000/api/signup',
+        ), // Example for Android emulator
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign up successful! Please log in.')),
+        );
+        Navigator.pop(context);
+      } else {
+        final errorData = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorData['message'] ?? 'Sign up failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Network error: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-              'assets/images/pixel.webp',
-            ), // Ensure your image path is correct
-            fit: BoxFit.cover, // Ensures the image covers the screen
+            image: AssetImage('assets/images/fight.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: Center(
@@ -28,9 +88,7 @@ class SignUpScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white),
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.black.withOpacity(
-                  0.5,
-                ), // Semi-transparent background for form
+                color: Colors.black.withOpacity(0.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -41,12 +99,10 @@ class SignUpScreen extends StatelessWidget {
                       fontSize: 50,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'RobotoMono', // Pixel style font
+                      fontFamily: 'RobotoMono',
                     ),
                   ),
                   const SizedBox(height: 80),
-
-                  // Username input field
                   TextField(
                     controller: usernameController,
                     style: const TextStyle(color: Colors.white),
@@ -55,16 +111,12 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Password input field
                   TextField(
                     controller: passwordController,
                     obscureText: true,
@@ -74,16 +126,12 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Confirm Password input field
                   TextField(
                     controller: confirmPasswordController,
                     obscureText: true,
@@ -93,59 +141,33 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 40),
-
-                  // Sign Up button with validation logic
-                  ElevatedButton(
-                    onPressed: () {
-                      if (usernameController.text.isEmpty ||
-                          passwordController.text.isEmpty ||
-                          confirmPasswordController.text.isEmpty) {
-                        // Show an error SnackBar if fields are empty
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please fill in all fields'),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                        onPressed: signUpUser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB35D32),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 100,
+                            vertical: 15,
                           ),
-                        );
-                      } else if (passwordController.text !=
-                          confirmPasswordController.text) {
-                        // Show an error SnackBar if passwords don't match
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Passwords do not match'),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      } else {
-                        print("Signing up...");
-                        // Navigate back to Login screen after successful signup
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB35D32),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 100,
-                        vertical: 15,
+                        ),
+                        child: const Text('SIGN UP'),
                       ),
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child: const Text('SIGN UP'),
-                  ),
                   const SizedBox(height: 20),
-
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // Navigate back to Login screen
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       'Already have an account?',

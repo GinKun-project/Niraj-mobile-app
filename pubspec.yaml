@@ -14,22 +14,22 @@ dependencies:
   flame: ^1.0.0  # For sprite and animation support
   provider: ^6.0.0  # If you're using state management
   cupertino_icons: ^1.0.8  # Ensure this is listed only once
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0  # For linting
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
 
-  # Add your assets (images and icons)
   assets:
-    - assets/images/pixel.webp
+    - assets/images/
     # - assets/icons/
 
-  # Fonts section (uncomment and edit if you want custom fonts)
-  # fonts:
-  #   - family: RobotoMono
-  #     fonts:
-  #       - asset: fonts/RobotoMono-Regular.ttf
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
