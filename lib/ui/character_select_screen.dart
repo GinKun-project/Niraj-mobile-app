@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shadow_clash/ui/battle_screen.dart'; // adjust path if needed
+import 'package:shadow_clash/ui/battle_screen.dart'; // Ensure this path is correct
 
 class CharacterSelectScreen extends StatelessWidget {
-  final List<String> characters = ['Warrior', 'Mage', 'Assassin', 'Tank'];
+  // Declare character list as final and const because it's static and unchanging
+  final List<String> characters = const ['Warrior', 'Mage', 'Assassin', 'Tank'];
 
-  // Removed `const` here as it contains dynamic content
+  const CharacterSelectScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,6 +14,8 @@ class CharacterSelectScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Select Your Character'),
         backgroundColor: const Color(0xFFB35D32),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,6 +43,13 @@ class CharacterSelectScreen extends StatelessWidget {
                   color: Colors.black87,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
@@ -47,6 +58,7 @@ class CharacterSelectScreen extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
                     ),
                   ),
                 ),

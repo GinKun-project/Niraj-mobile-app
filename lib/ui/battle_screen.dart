@@ -146,7 +146,7 @@ class _BattleScreenState extends State<BattleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the screen size to manage the game layout for landscape mode
+    // Get screen size for responsive layout
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -160,10 +160,8 @@ class _BattleScreenState extends State<BattleScreen> {
         builder: (context, constraints) {
           return Column(
             children: [
-              // Ensure the game takes full width for landscape
               Expanded(child: GameWidget(game: _game)),
-
-              // Dynamically adjusting the layout based on screen size
+              const SizedBox(height: 10),
               _buildStatusBar("Health", _game.playerHealth, Colors.green),
               const SizedBox(height: 10),
               _buildStatusBar("Energy", _game.playerEnergy, Colors.blue),

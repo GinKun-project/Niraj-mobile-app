@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_clash/ui/login_screen.dart';
 import 'package:shadow_clash/ui/character_select_screen.dart';
-import 'package:shadow_clash/ui/sign_up_screen.dart'; // Import Character Select
+import 'package:shadow_clash/ui/sign_up_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,13 +15,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shadow Clash',
       theme: ThemeData(primarySwatch: Colors.red),
-      home: LoginScreen(), // Start with LoginScreen
+      initialRoute: '/login', // Define the initial route
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
-        '/character_select':
-            (context) =>
-                CharacterSelectScreen(), // Add route for Character Select
+        '/character_select': (context) => CharacterSelectScreen(),
       },
     );
   }
