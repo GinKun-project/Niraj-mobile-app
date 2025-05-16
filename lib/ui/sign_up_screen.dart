@@ -112,7 +112,7 @@ class SignUpScreen extends StatelessWidget {
                         );
                       } else {
                         print("Signing up...");
-                        // Navigate back to Login screen after successful signup
+
                         Navigator.pop(context);
                       }
                     },

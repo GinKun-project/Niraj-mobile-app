@@ -13,10 +13,8 @@ class LoginScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-              'assets/images/fight.png',
-            ), // Ensure the image path is correct
-            fit: BoxFit.cover, // Ensures the image covers the screen
+            image: AssetImage('assets/images/fight.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: Center(
