@@ -14,7 +14,7 @@ class LoginScreen extends StatelessWidget {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
-              'assets/images/pixel.webp',
+              'assets/images/fight.png',
             ), // Ensure the image path is correct
             fit: BoxFit.cover, // Ensures the image covers the screen
           ),
@@ -56,11 +56,9 @@ class LoginScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   SizedBox(height: 20),
@@ -75,11 +73,9 @@ class LoginScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   SizedBox(height: 40),
@@ -89,12 +85,10 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       if (usernameController.text.isEmpty ||
                           passwordController.text.isEmpty) {
-                        // Basic validation for empty fields
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Please fill in both fields')),
                         );
                       } else {
-                        // Handle login logic here (e.g., validate against a database)
                         print("Logging in...");
                       }
                     },

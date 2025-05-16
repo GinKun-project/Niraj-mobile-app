@@ -14,10 +14,8 @@ class SignUpScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-              'assets/images/pixel.webp',
-            ), // Ensure your image path is correct
-            fit: BoxFit.cover, // Ensures the image covers the screen
+            image: AssetImage('assets/images/fight.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: Center(
@@ -28,9 +26,7 @@ class SignUpScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white),
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.black.withOpacity(
-                  0.5,
-                ), // Semi-transparent background for form
+                color: Colors.black.withOpacity(0.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -41,7 +37,7 @@ class SignUpScreen extends StatelessWidget {
                       fontSize: 50,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'RobotoMono', // Pixel style font
+                      fontFamily: 'RobotoMono',
                     ),
                   ),
                   const SizedBox(height: 80),
@@ -55,11 +51,9 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -74,11 +68,9 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -93,11 +85,9 @@ class SignUpScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.white),
                       filled: true,
                       fillColor: Colors.black,
-                      focusedBorder:
-                          InputBorder.none, // Remove border when focused
-                      enabledBorder:
-                          InputBorder.none, // Remove border when enabled
-                      border: InputBorder.none, // Completely remove border
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      border: InputBorder.none,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -108,7 +98,6 @@ class SignUpScreen extends StatelessWidget {
                       if (usernameController.text.isEmpty ||
                           passwordController.text.isEmpty ||
                           confirmPasswordController.text.isEmpty) {
-                        // Show an error SnackBar if fields are empty
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Please fill in all fields'),
@@ -116,7 +105,6 @@ class SignUpScreen extends StatelessWidget {
                         );
                       } else if (passwordController.text !=
                           confirmPasswordController.text) {
-                        // Show an error SnackBar if passwords don't match
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Passwords do not match'),

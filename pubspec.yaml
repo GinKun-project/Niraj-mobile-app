@@ -25,7 +25,7 @@ flutter:
 
   # Add your assets (images and icons)
   assets:
-    - assets/images/pixel.webp
+    - assets/images/
     # - assets/icons/
 
   # Fonts section (uncomment and edit if you want custom fonts)
