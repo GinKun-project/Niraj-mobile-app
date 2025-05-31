@@ -12,10 +12,10 @@ class Routes {
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
-      splash: (context) => SplashScreen(),
-      login: (context) => LoginPage(),
-      signup: (context) => SignupPage(),
-      dashboard: (context) => DashboardPage(),
+      splash: (context) => const SplashScreen(),
+      login: (context) => const LoginPage(),
+      signup: (context) => const SignupPage(),
+      dashboard: (context) => const DashboardPage(),
     };
   }
 }
