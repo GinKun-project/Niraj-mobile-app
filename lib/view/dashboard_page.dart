@@ -15,68 +15,117 @@ class DashboardPage extends StatelessWidget {
   Widget _buildPortraitLayout(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      drawer: _buildDrawer(context),
-      body: Stack(children: [
-        Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/bg.jpg'),
-              fit: BoxFit.cover,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.cyanAccent),
+            onSelected: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$value tapped')),
+              );
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Leaderboard',
+                child: Text('Leaderboard'),
+              ),
+              const PopupMenuItem(
+                value: 'Settings',
+                child: Text('Settings'),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg.jpg'),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-        ),
-        Container(color: Colors.black.withOpacity(0.6)),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'Shadow Clash',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.cyanAccent,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10,
-                        color: Colors.cyan,
-                        offset: Offset(0, 0),
-                      )
-                    ],
+          Container(color: Colors.black.withOpacity(0.6)),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Shadow Clash',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.cyanAccent,
+                      letterSpacing: 2,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10,
+                          color: Colors.cyan,
+                          offset: Offset(0, 0),
+                        )
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
-                    children: const [
-                      DashboardCard(
-                          icon: Icons.sports_esports, label: 'Adventure'),
-                      DashboardCard(
-                          icon: Icons.flash_on, label: 'Battle Arena'),
-                      DashboardCard(icon: Icons.stars, label: 'Achievements'),
-                      DashboardCard(icon: Icons.inventory, label: 'Inventory'),
-                    ],
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 20,
+                      crossAxisSpacing: 20,
+                      children: const [
+                        DashboardCard(
+                            icon: Icons.sports_esports, label: 'Adventure'),
+                        DashboardCard(
+                            icon: Icons.flash_on, label: 'Battle Arena'),
+                        DashboardCard(icon: Icons.stars, label: 'Achievements'),
+                        DashboardCard(
+                            icon: Icons.inventory, label: 'Inventory'),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
   Widget _buildLandscapeLayout(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      drawer: _buildDrawer(context),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.cyanAccent),
+            onSelected: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$value tapped')),
+              );
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Leaderboard',
+                child: Text('Leaderboard'),
+              ),
+              const PopupMenuItem(
+                value: 'Settings',
+                child: Text('Settings'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Container(
@@ -137,69 +186,6 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF29B6F6), Color(0xFF0288D1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration:
-                  BoxDecoration(color: Colors.cyanAccent.withOpacity(0.2)),
-              child: const Center(
-                child: Text(
-                  'Shadow Clash',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10,
-                        color: Colors.cyan,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.leaderboard, color: Colors.white),
-              title: const Text('Leaderboard',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Leaderboard tapped')),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings, color: Colors.white),
-              title:
-                  const Text('Settings', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Settings tapped')),
-                );
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
