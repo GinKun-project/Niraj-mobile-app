@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/login.jpg"),
+          image: AssetImage("assets/images/bg2.jpg"),
           fit: BoxFit.cover,
         ),
       ),

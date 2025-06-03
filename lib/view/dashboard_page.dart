@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import '../widgets/responsive_scaffold.dart';
 
@@ -7,17 +9,40 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
-      portraitLayout: _buildPortraitLayout(),
-      landscapeLayout: _buildLandscapeLayout(),
+      portraitLayout: _buildPortraitLayout(context),
+      landscapeLayout: _buildLandscapeLayout(context),
     );
   }
 
-  Widget _buildPortraitLayout() {
+  Widget _buildPortraitLayout(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.cyanAccent),
+            onSelected: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$value tapped')),
+              );
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Leaderboard',
+                child: Text('Leaderboard'),
+              ),
+              const PopupMenuItem(
+                value: 'Settings',
+                child: Text('Settings'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -27,8 +52,6 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
           Container(color: Colors.black.withOpacity(0.6)),
-
-          // Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -66,9 +89,6 @@ class DashboardPage extends StatelessWidget {
                         DashboardCard(icon: Icons.stars, label: 'Achievements'),
                         DashboardCard(
                             icon: Icons.inventory, label: 'Inventory'),
-                        DashboardCard(
-                            icon: Icons.leaderboard, label: 'Leaderboard'),
-                        DashboardCard(icon: Icons.settings, label: 'Settings'),
                       ],
                     ),
                   ),
@@ -81,12 +101,35 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLandscapeLayout() {
+  Widget _buildLandscapeLayout(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.cyanAccent),
+            onSelected: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('$value tapped')),
+              );
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'Leaderboard',
+                child: Text('Leaderboard'),
+              ),
+              const PopupMenuItem(
+                value: 'Settings',
+                child: Text('Settings'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -96,8 +139,6 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
           Container(color: Colors.black.withOpacity(0.6)),
-
-          // Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -139,9 +180,6 @@ class DashboardPage extends StatelessWidget {
                         DashboardCard(icon: Icons.stars, label: 'Achievements'),
                         DashboardCard(
                             icon: Icons.inventory, label: 'Inventory'),
-                        DashboardCard(
-                            icon: Icons.leaderboard, label: 'Leaderboard'),
-                        DashboardCard(icon: Icons.settings, label: 'Settings'),
                       ],
                     ),
                   ),
