@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import '../widgets/responsive_scaffold.dart';
 
@@ -14,7 +16,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildPortraitLayout(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
