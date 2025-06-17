@@ -13,7 +13,7 @@ class App extends StatelessWidget {
       title: 'Shadow Clash',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: '/login',
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => SplashView(),
         '/login': (context) => const LoginView(),
