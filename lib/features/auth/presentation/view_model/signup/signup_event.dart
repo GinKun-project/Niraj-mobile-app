@@ -3,5 +3,9 @@ class SignupEvent {
   final String email;
   final String password;
 
-  SignupEvent(this.username, this.email, this.password);
+  SignupEvent({
+    required this.username,
+    required this.email,
+    required this.password,
+  });
 }

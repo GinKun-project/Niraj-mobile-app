@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
-import 'package:shadow_clash_frontend/app/hive/hive_service.dart';
+import 'package:shadow_clash_frontend/core/services/hive_service.dart';
 import 'package:shadow_clash_frontend/features/auth/data/auth_remote_data_source.dart';
+import 'package:shadow_clash_frontend/features/auth/data/auth_repository_impl.dart';
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/domain/auth_repository.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/login/login_view_model.dart';
@@ -9,8 +10,8 @@ import 'package:shadow_clash_frontend/features/splash/presentation/view_model/sp
 
 final GetIt getIt = GetIt.instance;
 
-Future<void> initServiceLocator() async {
-  // ✅ Core
+Future<void> setupServiceLocator() async {
+  // ✅ Initialize Hive
   await HiveService.initializeHive();
 
   // ✅ Data Sources
@@ -19,7 +20,7 @@ Future<void> initServiceLocator() async {
   );
   getIt.registerLazySingleton<LocalUserDataSource>(() => LocalUserDataSource());
 
-  // ✅ Repository
+  // ✅ Repository Implementation
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: getIt()),
   );

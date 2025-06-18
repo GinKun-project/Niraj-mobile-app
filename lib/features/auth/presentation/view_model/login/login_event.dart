@@ -2,5 +2,8 @@ class LoginEvent {
   final String email;
   final String password;
 
-  LoginEvent(this.email, this.password);
+  LoginEvent({
+    required this.email,
+    required this.password,
+  }); // ✅ named constructor
 }

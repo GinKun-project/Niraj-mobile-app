@@ -7,12 +7,43 @@ import 'signup_state.dart';
 
 class SignupViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
-  final LocalUserDataSource _localDataSource = LocalUserDataSource(); // ✅ Hive
+  final LocalUserDataSource _localDataSource = LocalUserDataSource();
 
   SignupState _state = SignupState();
   SignupState get state => _state;
 
+  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
   SignupViewModel(this._authRepository);
+
+  bool get isLoading => _state.status == SignupStatus.loading;
+
+  Future<void> signup(BuildContext context) async {
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      _state = _state.copyWith(
+        status: SignupStatus.failure,
+        error: 'Please fill all fields',
+      );
+      notifyListeners();
+      return;
+    }
+
+    await handleSignup(
+      SignupEvent(username: username, email: email, password: password),
+    );
+
+    if (_state.status == SignupStatus.success) {
+      final user = UserHiveModel(username: username, email: email);
+      await _localDataSource.saveUser(user);
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    }
+  }
 
   Future<void> handleSignup(SignupEvent event) async {
     _state = _state.copyWith(status: SignupStatus.loading);
@@ -25,9 +56,6 @@ class SignupViewModel extends ChangeNotifier {
     );
 
     if (success) {
-      final user = UserHiveModel(username: event.username, email: event.email);
-      await _localDataSource.saveUser(user);
-
       _state = _state.copyWith(status: SignupStatus.success);
     } else {
       _state = _state.copyWith(
@@ -35,7 +63,14 @@ class SignupViewModel extends ChangeNotifier {
         error: 'Signup failed',
       );
     }
-
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

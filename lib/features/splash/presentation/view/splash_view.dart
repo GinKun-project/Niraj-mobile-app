@@ -29,14 +29,6 @@ class _SplashViewState extends State<SplashView> {
           children: [
             Image.asset('assets/images/splash.png', height: 120),
             const SizedBox(height: 30),
-            const Text(
-              'Shadow Clash',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
-            ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(color: Colors.deepPurpleAccent),
           ],
