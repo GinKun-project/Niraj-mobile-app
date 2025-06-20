@@ -7,11 +7,11 @@ import 'package:shadow_clash_frontend/features/auth/domain/auth_repository.dart'
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/login/login_view_model.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_view_model.dart';
 import 'package:shadow_clash_frontend/features/splash/presentation/view_model/splash_view_model.dart';
+import 'package:shadow_clash_frontend/features/dashboard/presentation/view_model/dashboard_view_model.dart'; // ✅ Add this
 
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
-  // Initialize Hive
   await HiveService.initializeHive();
 
   // Data Sources
@@ -20,7 +20,7 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<LocalUserDataSource>(() => LocalUserDataSource());
 
-  // Repository Implementation
+  // Repository
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt()),
   );
@@ -29,4 +29,5 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory(() => LoginViewModel(getIt()));
   getIt.registerFactory(() => SignupViewModel(getIt()));
   getIt.registerFactory(() => SplashViewModel());
+  getIt.registerFactory(() => DashboardViewModel());
 }

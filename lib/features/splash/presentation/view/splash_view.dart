@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:shadow_clash_frontend/features/splash/presentation/view_model/splash_view_model.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -9,14 +10,25 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  late SplashViewModel _viewModel;
+
   @override
   void initState() {
     super.initState();
+    _viewModel = Provider.of<SplashViewModel>(context, listen: false);
+    _startSplashLogic();
+  }
 
-    // Simulate loading then go to login
-    Timer(const Duration(seconds: 3), () {
+  Future<void> _startSplashLogic() async {
+    await _viewModel.checkLoginStatus();
+
+    if (!mounted) return; // ✅ Prevent invalid context
+
+    if (_viewModel.status == SplashStatus.loggedIn) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
       Navigator.pushReplacementNamed(context, '/login');
-    });
+    }
   }
 
   @override
@@ -29,7 +41,6 @@ class _SplashViewState extends State<SplashView> {
           children: [
             Image.asset('assets/images/splash.png', height: 120),
             const SizedBox(height: 30),
-            const SizedBox(height: 20),
             const CircularProgressIndicator(color: Colors.deepPurpleAccent),
           ],
         ),

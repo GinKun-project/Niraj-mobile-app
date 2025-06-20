@@ -44,11 +44,10 @@ class SignupViewModel extends ChangeNotifier {
 
     if (_state.status == SignupStatus.success) {
       Navigator.pushReplacementNamed(context, '/dashboard');
-    } else if (_state.error != null) {
+    } else
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(_state.error!)));
-    }
   }
 
   Future<void> handleSignup(SignupEvent event) async {

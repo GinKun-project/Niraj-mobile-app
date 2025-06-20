@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:shadow_clash_frontend/app/theme/app_theme.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view/login_view.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view/signup_view.dart';
+import 'package:shadow_clash_frontend/features/dashboard/presentation/view/dashboard_view.dart';
 import 'package:shadow_clash_frontend/features/splash/presentation/view/splash_view.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/login/login_view_model.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_view_model.dart';
+import 'package:shadow_clash_frontend/features/splash/presentation/view_model/splash_view_model.dart';
+import 'package:shadow_clash_frontend/features/dashboard/presentation/view_model/dashboard_view_model.dart';
 import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
 
 class App extends StatelessWidget {
@@ -19,7 +22,10 @@ class App extends StatelessWidget {
       theme: AppTheme.darkTheme,
       initialRoute: '/splash',
       routes: {
-        '/splash': (context) => SplashView(),
+        '/splash': (context) => ChangeNotifierProvider(
+          create: (_) => getIt<SplashViewModel>(),
+          child: const SplashView(),
+        ),
         '/login': (context) => ChangeNotifierProvider(
           create: (_) => getIt<LoginViewModel>(),
           child: const LoginView(),
@@ -27,6 +33,10 @@ class App extends StatelessWidget {
         '/signup': (context) => ChangeNotifierProvider(
           create: (_) => getIt<SignupViewModel>(),
           child: const SignupView(),
+        ),
+        '/dashboard': (context) => ChangeNotifierProvider(
+          create: (_) => getIt<DashboardViewModel>(),
+          child: const DashboardView(),
         ),
       },
     );
