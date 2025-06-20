@@ -22,10 +22,13 @@ class App extends StatelessWidget {
       theme: AppTheme.darkTheme,
       initialRoute: '/splash',
       routes: {
-        '/splash': (context) => ChangeNotifierProvider(
-          create: (_) => getIt<SplashViewModel>(),
-          child: const SplashView(),
-        ),
+        '/splash': (context) {
+          return ChangeNotifierProvider(
+            create: (_) => getIt<SplashViewModel>(),
+            builder: (context, child) => const SplashView(),
+          );
+        },
+
         '/login': (context) => ChangeNotifierProvider(
           create: (_) => getIt<LoginViewModel>(),
           child: const LoginView(),

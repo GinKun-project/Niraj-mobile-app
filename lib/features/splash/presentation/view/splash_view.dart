@@ -15,14 +15,18 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = Provider.of<SplashViewModel>(context, listen: false);
-    _startSplashLogic();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel = Provider.of<SplashViewModel>(context, listen: false);
+      _startSplashLogic();
+    });
   }
 
   Future<void> _startSplashLogic() async {
+    await Future.delayed(const Duration(seconds: 2)); // Splash delay
     await _viewModel.checkLoginStatus();
 
-    if (!mounted) return; // ✅ Prevent invalid context
+    if (!mounted) return;
 
     if (_viewModel.status == SplashStatus.loggedIn) {
       Navigator.pushReplacementNamed(context, '/dashboard');

@@ -40,10 +40,11 @@ class LoginViewModel extends ChangeNotifier {
 
     if (_state.status == LoginStatus.success) {
       Navigator.pushReplacementNamed(context, '/dashboard');
-    } else
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(_state.error!)));
+      ).showSnackBar(SnackBar(content: Text(_state.error)));
+    }
   }
 
   Future<void> handleLogin(LoginEvent event) async {
