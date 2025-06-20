@@ -8,6 +8,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<LoginViewModel>(context);
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -35,12 +36,12 @@ class LoginView extends StatelessWidget {
                 TextField(
                   controller: viewModel.emailController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Email',
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.email, color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.email, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.5),
+                    fillColor: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -48,17 +49,19 @@ class LoginView extends StatelessWidget {
                   controller: viewModel.passwordController,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Password',
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.lock, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.5),
+                    fillColor: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 30),
                 viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(
+                        color: Colors.deepPurpleAccent,
+                      )
                     : ElevatedButton(
                         onPressed: () => viewModel.login(context),
                         style: ElevatedButton.styleFrom(
@@ -75,14 +78,6 @@ class LoginView extends StatelessWidget {
                         ),
                         child: const Text('LOGIN'),
                       ),
-                if (viewModel.state.error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: Text(
-                      viewModel.state.error,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {

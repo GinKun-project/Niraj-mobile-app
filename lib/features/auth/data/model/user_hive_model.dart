@@ -10,5 +10,12 @@ class UserHiveModel extends HiveObject {
   @HiveField(1)
   final String email;
 
-  UserHiveModel({required this.username, required this.email});
+  @HiveField(2)
+  final String? token; // NEW FIELD
+
+  UserHiveModel({
+    required this.username,
+    required this.email,
+    this.token, // Optional for signup
+  });
 }

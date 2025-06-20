@@ -9,35 +9,41 @@ class LoginViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
   final LocalUserDataSource _localDataSource = LocalUserDataSource();
 
-  LoginState _state = LoginState();
-  LoginState get state => _state;
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  LoginViewModel(this._authRepository);
+  LoginState _state = LoginState();
+  LoginState get state => _state;
 
-  bool get isLoading => _state.status == LoginStatus.loading;
+  bool isLoading = false;
+
+  LoginViewModel(this._authRepository);
 
   Future<void> login(BuildContext context) async {
     final email = emailController.text.trim();
-    final password = passwordController.text;
+    final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _state = _state.copyWith(
-        status: LoginStatus.failure,
-        error: 'Please enter email and password',
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter both email and password')),
       );
-      notifyListeners();
       return;
     }
 
+    isLoading = true;
+    notifyListeners();
+
     await handleLogin(LoginEvent(email: email, password: password));
 
+    isLoading = false;
+    notifyListeners();
+
     if (_state.status == LoginStatus.success) {
-      final user = UserHiveModel(username: "Player", email: email);
-      await _localDataSource.saveUser(user);
       Navigator.pushReplacementNamed(context, '/dashboard');
+    } else if (_state.error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_state.error!)));
     }
   }
 
@@ -45,8 +51,16 @@ class LoginViewModel extends ChangeNotifier {
     _state = _state.copyWith(status: LoginStatus.loading);
     notifyListeners();
 
-    final success = await _authRepository.login(event.email, event.password);
-    if (success) {
+    final result = await _authRepository.login(event.email, event.password);
+
+    if (result != null) {
+      final user = UserHiveModel(
+        username: "Player",
+        email: event.email,
+        token: result.token, //Store JWT token
+      );
+      await _localDataSource.saveUser(user);
+
       _state = _state.copyWith(status: LoginStatus.success);
     } else {
       _state = _state.copyWith(
@@ -54,13 +68,7 @@ class LoginViewModel extends ChangeNotifier {
         error: 'Invalid credentials',
       );
     }
-    notifyListeners();
-  }
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
+    notifyListeners();
   }
 }

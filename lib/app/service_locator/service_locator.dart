@@ -11,21 +11,21 @@ import 'package:shadow_clash_frontend/features/splash/presentation/view_model/sp
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
-  // ✅ Initialize Hive
+  // Initialize Hive
   await HiveService.initializeHive();
 
-  // ✅ Data Sources
+  // Data Sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSource(),
   );
   getIt.registerLazySingleton<LocalUserDataSource>(() => LocalUserDataSource());
 
-  // ✅ Repository Implementation
+  // Repository Implementation
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(remoteDataSource: getIt()),
+    () => AuthRepositoryImpl(getIt()),
   );
 
-  // ✅ ViewModels
+  // ViewModels
   getIt.registerFactory(() => LoginViewModel(getIt()));
   getIt.registerFactory(() => SignupViewModel(getIt()));
   getIt.registerFactory(() => SplashViewModel());

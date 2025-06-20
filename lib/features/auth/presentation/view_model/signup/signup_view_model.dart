@@ -9,39 +9,45 @@ class SignupViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
   final LocalUserDataSource _localDataSource = LocalUserDataSource();
 
-  SignupState _state = SignupState();
-  SignupState get state => _state;
-
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  SignupViewModel(this._authRepository);
+  SignupState _state = SignupState();
+  SignupState get state => _state;
 
-  bool get isLoading => _state.status == SignupStatus.loading;
+  bool isLoading = false;
+
+  SignupViewModel(this._authRepository);
 
   Future<void> signup(BuildContext context) async {
     final username = usernameController.text.trim();
     final email = emailController.text.trim();
-    final password = passwordController.text;
+    final password = passwordController.text.trim();
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      _state = _state.copyWith(
-        status: SignupStatus.failure,
-        error: 'Please fill all fields',
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
       );
-      notifyListeners();
       return;
     }
+
+    isLoading = true;
+    notifyListeners();
 
     await handleSignup(
       SignupEvent(username: username, email: email, password: password),
     );
 
+    isLoading = false;
+    notifyListeners();
+
     if (_state.status == SignupStatus.success) {
-      final user = UserHiveModel(username: username, email: email);
-      await _localDataSource.saveUser(user);
       Navigator.pushReplacementNamed(context, '/dashboard');
+    } else if (_state.error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_state.error!)));
     }
   }
 
@@ -55,7 +61,10 @@ class SignupViewModel extends ChangeNotifier {
       event.password,
     );
 
-    if (success) {
+    if (success != null) {
+      final user = UserHiveModel(username: event.username, email: event.email);
+      await _localDataSource.saveUser(user);
+
       _state = _state.copyWith(status: SignupStatus.success);
     } else {
       _state = _state.copyWith(
@@ -63,14 +72,7 @@ class SignupViewModel extends ChangeNotifier {
         error: 'Signup failed',
       );
     }
-    notifyListeners();
-  }
 
-  @override
-  void dispose() {
-    usernameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
+    notifyListeners();
   }
 }

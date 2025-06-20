@@ -8,6 +8,7 @@ class SignupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<SignupViewModel>(context);
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -35,24 +36,24 @@ class SignupView extends StatelessWidget {
                 TextField(
                   controller: viewModel.usernameController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Username',
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.person_2, color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.person_2, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.5),
+                    fillColor: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: viewModel.emailController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Email',
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.email, color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.email, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.5),
+                    fillColor: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -60,17 +61,19 @@ class SignupView extends StatelessWidget {
                   controller: viewModel.passwordController,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Password',
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    prefixIcon: Icon(Icons.lock, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.5),
+                    fillColor: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 30),
                 viewModel.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(
+                        color: Colors.deepPurpleAccent,
+                      )
                     : ElevatedButton(
                         onPressed: () => viewModel.signup(context),
                         style: ElevatedButton.styleFrom(
@@ -87,14 +90,6 @@ class SignupView extends StatelessWidget {
                         ),
                         child: const Text('Sign Up'),
                       ),
-                if (viewModel.state.error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: Text(
-                      viewModel.state.error,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
