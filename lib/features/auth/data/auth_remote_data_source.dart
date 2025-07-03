@@ -3,9 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shadow_clash_frontend/features/auth/data/model/login_response.dart';
 
 class AuthRemoteDataSource {
-  final String baseUrl = 'http://localhost:5000/api/auth';
+  final String baseUrl = 'http://10.0.2.2:5000/api/auth';
 
-  /// Attempts real login; falls back to mock if offline or error
   Future<LoginResponse?> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -18,22 +17,15 @@ class AuthRemoteDataSource {
         final json = jsonDecode(response.body);
         return LoginResponse.fromJson(json);
       } else {
+        print('❌ Login failed: ${response.body}');
         return null;
       }
     } catch (e) {
-      // ✅ fallback when backend is not running
-      if (email == 'demo@shadow.com' && password == '123456') {
-        return LoginResponse(
-          token: 'mock_token_demo',
-          username: 'ShadowPlayer',
-          email: email,
-        );
-      }
+      print('❌ Login error: $e');
       return null;
     }
   }
 
-  /// Attempts real signup; falls back to mock if offline or error
   Future<LoginResponse?> signup(
     String username,
     String email,
@@ -54,15 +46,12 @@ class AuthRemoteDataSource {
         final json = jsonDecode(response.body);
         return LoginResponse.fromJson(json);
       } else {
+        print('❌ Signup failed: ${response.body}');
         return null;
       }
     } catch (e) {
-      // ✅ fallback mock signup
-      return LoginResponse(
-        token: 'mock_token_signup',
-        username: username,
-        email: email,
-      );
+      print('❌ Signup error: $e');
+      return null;
     }
   }
 }

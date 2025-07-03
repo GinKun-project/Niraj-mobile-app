@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
+import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localSource = getIt<LocalUserDataSource>();
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Positioned.fill(
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Foreground content
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 20),
-
-                // Title
                 Center(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -49,8 +48,6 @@ class DashboardView extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Play Button
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/game');
@@ -72,6 +69,22 @@ class DashboardView extends StatelessWidget {
                   ),
                 ),
 
+                // ✅ Logout Button
+                TextButton(
+                  onPressed: () async {
+                    await localSource.clearUser(); // Remove from Hive
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
                 // Bottom Navigation
                 Padding(
                   padding: const EdgeInsets.only(bottom: 24.0),
@@ -80,21 +93,16 @@ class DashboardView extends StatelessWidget {
                     children: [
                       _circleButton(
                         icon: Icons.person,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/profile');
-                        },
+                        onTap: () => Navigator.pushNamed(context, '/profile'),
                       ),
                       _circleButton(
                         icon: Icons.star,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/achievements');
-                        },
+                        onTap: () =>
+                            Navigator.pushNamed(context, '/achievements'),
                       ),
                       _circleButton(
                         icon: Icons.settings,
-                        onTap: () {
-                          Navigator.pushNamed(context, '/settings');
-                        },
+                        onTap: () => Navigator.pushNamed(context, '/settings'),
                       ),
                     ],
                   ),

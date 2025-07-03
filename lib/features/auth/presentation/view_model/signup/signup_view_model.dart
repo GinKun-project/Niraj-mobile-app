@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadow_clash_frontend/features/auth/domain/auth_repository.dart';
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/user_hive_model.dart';
-import 'signup_event.dart';
+import 'package:shadow_clash_frontend/features/auth/data/model/login_response.dart';
 import 'signup_state.dart';
 
 class SignupViewModel extends ChangeNotifier {
@@ -35,44 +35,32 @@ class SignupViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    await handleSignup(
-      SignupEvent(username: username, email: email, password: password),
+    final LoginResponse? response = await _authRepository.signup(
+      username,
+      email,
+      password,
     );
 
     isLoading = false;
     notifyListeners();
 
-    if (_state.status == SignupStatus.success) {
-      Navigator.pushReplacementNamed(context, '/dashboard');
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_state.error)));
-    }
-  }
-
-  Future<void> handleSignup(SignupEvent event) async {
-    _state = _state.copyWith(status: SignupStatus.loading);
-    notifyListeners();
-
-    final success = await _authRepository.signup(
-      event.username,
-      event.email,
-      event.password,
-    );
-
-    if (success != null) {
-      final user = UserHiveModel(username: event.username, email: event.email);
+    if (response != null && response.token.isNotEmpty) {
+      final user = UserHiveModel(
+        username: response.username,
+        email: response.email,
+      );
       await _localDataSource.saveUser(user);
 
-      _state = _state.copyWith(status: SignupStatus.success);
+      Navigator.pushReplacementNamed(context, '/login');
     } else {
       _state = _state.copyWith(
         status: SignupStatus.failure,
         error: 'Signup failed',
       );
+      notifyListeners();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_state.error)));
     }
-
-    notifyListeners();
   }
 }
