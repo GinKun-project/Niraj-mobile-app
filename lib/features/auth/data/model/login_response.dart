@@ -9,11 +9,15 @@ class LoginResponse {
     required this.email,
   });
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+  factory LoginResponse.fromJson(Map<String, dynamic>? json) {
+    final user = json?['user'] as Map<String, dynamic>?;
+
     return LoginResponse(
-      token: json['token'] ?? '', // fallback if null
-      username: json['user']['username'] ?? '',
-      email: json['user']['email'] ?? '',
+      token: json?['token'] ?? '',
+      username: user?['username'] ?? '',
+      email: user?['email'] ?? '',
     );
   }
+
+  toJson() {}
 }

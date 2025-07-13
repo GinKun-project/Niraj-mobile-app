@@ -3,6 +3,7 @@ import 'package:shadow_clash_frontend/features/auth/domain/auth_repository.dart'
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/user_hive_model.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/login_response.dart';
+import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_event.dart';
 import 'signup_state.dart';
 
 class SignupViewModel extends ChangeNotifier {
@@ -63,4 +64,6 @@ class SignupViewModel extends ChangeNotifier {
       ).showSnackBar(SnackBar(content: Text(_state.error)));
     }
   }
+
+  Future<void> handleSignup(SignupEvent signupEvent) async {}
 }
