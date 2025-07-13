@@ -75,13 +75,20 @@ class DashboardView extends StatelessWidget {
                     await localSource.clearUser(); // Remove from Hive
                     Navigator.pushReplacementNamed(context, '/login');
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA64D),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 80,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(color: Colors.brown, width: 3),
+                    ),
+                  ),
                   child: const Text(
                     'Logout',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 24, color: Colors.white),
                   ),
                 ),
 
