@@ -69,11 +69,12 @@ class DashboardView extends StatelessWidget {
                   ),
                 ),
 
-                // ✅ Logout Button
                 TextButton(
                   onPressed: () async {
-                    await localSource.clearUser(); // Remove from Hive
-                    Navigator.pushReplacementNamed(context, '/login');
+                    await localSource.clearUser();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFA64D),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:shadow_clash_frontend/app/theme/app_theme.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view/login_view.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view/signup_view.dart';
 import 'package:shadow_clash_frontend/features/dashboard/presentation/view/dashboard_view.dart';
+import 'package:shadow_clash_frontend/features/game/presentation/view/game_view.dart';
 import 'package:shadow_clash_frontend/features/splash/presentation/view/splash_view.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/login/login_view_model.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_view_model.dart';
@@ -23,24 +25,25 @@ class App extends StatelessWidget {
       initialRoute: '/splash',
       routes: {
         '/splash': (context) {
-          return ChangeNotifierProvider(
+          return provider.ChangeNotifierProvider(
             create: (_) => getIt<SplashViewModel>(),
             builder: (context, child) => const SplashView(),
           );
         },
 
-        '/login': (context) => ChangeNotifierProvider(
+        '/login': (context) => provider.ChangeNotifierProvider(
           create: (_) => getIt<LoginViewModel>(),
           child: const LoginView(),
         ),
-        '/signup': (context) => ChangeNotifierProvider(
+        '/signup': (context) => provider.ChangeNotifierProvider(
           create: (_) => getIt<SignupViewModel>(),
           child: const SignupView(),
         ),
-        '/dashboard': (context) => ChangeNotifierProvider(
+        '/dashboard': (context) => provider.ChangeNotifierProvider(
           create: (_) => getIt<DashboardViewModel>(),
           child: const DashboardView(),
         ),
+        '/game': (context) => const ProviderScope(child: GameView()),
       },
     );
   }

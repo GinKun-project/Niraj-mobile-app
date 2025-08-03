@@ -45,6 +45,8 @@ dependencies:
   hive: ^2.2.3
   http: ^1.4.0
   mockito: ^5.4.5
+  provider: ^6.1.2
+  flutter_riverpod: ^2.5.1
   flutter_test:
     sdk: flutter
   hive_flutter: ^1.1.0

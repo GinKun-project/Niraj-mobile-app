@@ -19,5 +19,10 @@ class LoginResponse {
     );
   }
 
-  toJson() {}
+  Map<String, dynamic> toJson() {
+    return {
+      'token': token,
+      'user': {'username': username, 'email': email},
+    };
+  }
 }

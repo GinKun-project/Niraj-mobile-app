@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import 'package:shadow_clash_frontend/features/auth/data/model/login_response.dart';
 
@@ -17,11 +18,14 @@ class AuthRemoteDataSource {
         final json = jsonDecode(response.body);
         return LoginResponse.fromJson(json);
       } else {
-        print('❌ Login failed: ${response.body}');
+        developer.log(
+          'Login failed: ${response.body}',
+          name: 'AuthRemoteDataSource',
+        );
         return null;
       }
     } catch (e) {
-      print('❌ Login error: $e');
+      developer.log('Login error: $e', name: 'AuthRemoteDataSource');
       return null;
     }
   }
@@ -46,11 +50,14 @@ class AuthRemoteDataSource {
         final json = jsonDecode(response.body);
         return LoginResponse.fromJson(json);
       } else {
-        print('❌ Signup failed: ${response.body}');
+        developer.log(
+          'Signup failed: ${response.body}',
+          name: 'AuthRemoteDataSource',
+        );
         return null;
       }
     } catch (e) {
-      print('❌ Signup error: $e');
+      developer.log('Signup error: $e', name: 'AuthRemoteDataSource');
       return null;
     }
   }

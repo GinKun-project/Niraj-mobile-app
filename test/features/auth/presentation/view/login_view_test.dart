@@ -16,18 +16,17 @@ class MockLoginViewModel extends ChangeNotifier implements LoginViewModel {
   @override
   bool isLoading = false;
 
+  final LoginState _state = LoginState();
+  @override
+  LoginState get state => _state;
+
   @override
   Future<void> login(BuildContext context) async {}
 
   @override
-  Future<void> handleLogin(LoginEvent event) {
-    // TODO: implement handleLogin
-    throw UnimplementedError();
+  Future<void> handleLogin(LoginEvent event) async {
+    // Mock implementation
   }
-
-  @override
-  // TODO: implement state
-  LoginState get state => throw UnimplementedError();
 }
 
 void main() {
@@ -36,12 +35,12 @@ void main() {
       MaterialApp(
         home: ChangeNotifierProvider<LoginViewModel>(
           create: (_) => MockLoginViewModel(),
-          child: LoginView(),
+          child: const LoginView(),
         ),
       ),
     );
 
-    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('LOGIN'), findsNWidgets(2)); // Title and button
     expect(find.byType(TextField), findsNWidgets(2));
     expect(find.byType(ElevatedButton), findsOneWidget);
   });

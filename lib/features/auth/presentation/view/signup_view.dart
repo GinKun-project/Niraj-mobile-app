@@ -17,7 +17,7 @@ class SignupView extends StatelessWidget {
             image: AssetImage('assets/images/splash.png'),
             fit: BoxFit.cover,
           ),
-          Container(color: Colors.black.withOpacity(0.6)),
+          Container(color: Colors.black.withValues(alpha: 0.6)),
           SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
