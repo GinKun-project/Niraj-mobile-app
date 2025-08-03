@@ -47,6 +47,8 @@ dependencies:
   mockito: ^5.4.5
   provider: ^6.1.2
   flutter_riverpod: ^2.5.1
+  audioplayers: ^5.2.1
+  sensors_plus: ^4.0.2
   flutter_test:
     sdk: flutter
   hive_flutter: ^1.1.0
@@ -75,6 +77,15 @@ flutter:
   assets:
     - assets/images/splash.png
     - assets/images/background.png
+    - assets/images/Player.png
+    - assets/images/Enemy.png
+    - assets/sounds/sword.wav
+    - assets/sounds/crit.mp3
+    - assets/sounds/impact.wav
+    - assets/sounds/menu.wav
+    - assets/sounds/notification.mp3
+    - assets/sounds/backgound.wav
+    - assets/sounds/skill.wav
 
   #   - images/a_dot_ham.jpeg
 

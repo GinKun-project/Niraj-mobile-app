@@ -18,10 +18,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigationService = getIt<NavigationService>();
+
     return MaterialApp(
       title: 'Shadow Clash',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
+      navigatorKey: navigationService.navigatorKey,
       initialRoute: '/splash',
       routes: {
         '/splash': (context) {

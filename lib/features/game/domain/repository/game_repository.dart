@@ -5,4 +5,8 @@ abstract class GameRepository {
   Future<GameStateEntity> playerAttack(GameStateEntity currentState);
   Future<GameStateEntity> aiTurn(GameStateEntity currentState);
   Future<GameStateEntity> updateTimer(GameStateEntity currentState);
+  Future<void> playMenuSelect();
+  Future<void> playTurnNotification();
+  Future<void> playSensorAlert();
+  Future<void> stopBackgroundMusic();
 }

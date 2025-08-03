@@ -2,12 +2,17 @@ import 'dart:math';
 import 'package:shadow_clash_frontend/features/game/domain/entity/game_state_entity.dart';
 import 'package:shadow_clash_frontend/features/game/domain/entity/player_entity.dart';
 import 'package:shadow_clash_frontend/features/game/domain/repository/game_repository.dart';
+import 'package:shadow_clash_frontend/features/game/data/service/audio_service.dart';
 
 class GameRepositoryImpl implements GameRepository {
   final Random _random = Random();
+  final AudioService _audioService = AudioService();
 
   @override
   Future<GameStateEntity> initializeGame() async {
+    await _audioService.initialize();
+    await _audioService.playBackgroundMusic();
+
     final player = PlayerEntity(
       name: 'Player',
       maxHp: 1200,
@@ -47,6 +52,8 @@ class GameRepositoryImpl implements GameRepository {
       return currentState;
     }
 
+    await _audioService.playSwordSwing();
+
     final ai = currentState.ai;
     if (_random.nextDouble() < ai.dodgeChance) {
       return currentState.copyWith(
@@ -54,13 +61,22 @@ class GameRepositoryImpl implements GameRepository {
         isPlayerTurn: false,
         damagePopups: [
           ...currentState.damagePopups,
-          DamagePopup(text: 'DODGE!', timestamp: DateTime.now()),
+          DamagePopup(
+            text: 'DODGE!',
+            isForPlayer: false,
+            timestamp: DateTime.now(),
+          ),
         ],
       );
     }
 
     final isCritical =
         _random.nextDouble() < currentState.player.criticalChance;
+
+    if (isCritical) {
+      await _audioService.playCriticalHit();
+    }
+
     final damage = isCritical
         ? (currentState.player.attack * 2.0 - ai.defense * 0.4).round()
         : (currentState.player.attack - ai.defense * 0.3).round();
@@ -69,7 +85,9 @@ class GameRepositoryImpl implements GameRepository {
     final newAiHp = (ai.currentHp - finalDamage).clamp(0, ai.maxHp);
     final newAi = ai.copyWith(currentHp: newAiHp);
 
-    final action = isCritical ? '-${finalDamage} CRIT!' : '-$finalDamage';
+    await _audioService.playImpact();
+
+    final action = isCritical ? '-$finalDamage CRIT!' : '-$finalDamage';
     final status = newAiHp <= 0 ? GameStatus.victory : GameStatus.playing;
 
     return currentState.copyWith(
@@ -82,6 +100,7 @@ class GameRepositoryImpl implements GameRepository {
         DamagePopup(
           text: action,
           isCritical: isCritical,
+          isForPlayer: false,
           timestamp: DateTime.now(),
         ),
       ],
@@ -103,12 +122,21 @@ class GameRepositoryImpl implements GameRepository {
         isPlayerTurn: true,
         damagePopups: [
           ...currentState.damagePopups,
-          DamagePopup(text: 'DODGE!', timestamp: DateTime.now()),
+          DamagePopup(
+            text: 'DODGE!',
+            isForPlayer: true,
+            timestamp: DateTime.now(),
+          ),
         ],
       );
     }
 
     final isCritical = _random.nextDouble() < currentState.ai.criticalChance;
+
+    if (isCritical) {
+      await _audioService.playCriticalHit();
+    }
+
     final damage = isCritical
         ? (currentState.ai.attack * 2.0 - player.defense * 0.4).round()
         : (currentState.ai.attack - player.defense * 0.3).round();
@@ -117,7 +145,9 @@ class GameRepositoryImpl implements GameRepository {
     final newPlayerHp = (player.currentHp - finalDamage).clamp(0, player.maxHp);
     final newPlayer = player.copyWith(currentHp: newPlayerHp);
 
-    final action = isCritical ? '-${finalDamage} CRIT!' : '-$finalDamage';
+    await _audioService.playImpact();
+
+    final action = isCritical ? '-$finalDamage CRIT!' : '-$finalDamage';
     final status = newPlayerHp <= 0 ? GameStatus.defeat : GameStatus.playing;
 
     return currentState.copyWith(
@@ -130,6 +160,7 @@ class GameRepositoryImpl implements GameRepository {
         DamagePopup(
           text: action,
           isCritical: isCritical,
+          isForPlayer: true,
           timestamp: DateTime.now(),
         ),
       ],
@@ -155,5 +186,25 @@ class GameRepositoryImpl implements GameRepository {
     }
 
     return currentState.copyWith(timeRemaining: currentState.timeRemaining - 1);
+  }
+
+  @override
+  Future<void> playMenuSelect() async {
+    await _audioService.playMenuSelect();
+  }
+
+  @override
+  Future<void> playTurnNotification() async {
+    await _audioService.playTurnNotification();
+  }
+
+  @override
+  Future<void> playSensorAlert() async {
+    await _audioService.playSensorAlert();
+  }
+
+  @override
+  Future<void> stopBackgroundMusic() async {
+    await _audioService.stopBackgroundMusic();
   }
 }

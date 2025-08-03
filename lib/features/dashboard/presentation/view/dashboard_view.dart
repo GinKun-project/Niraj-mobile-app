@@ -8,6 +8,7 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localSource = getIt<LocalUserDataSource>();
+    final navigationService = getIt<NavigationService>();
 
     return Scaffold(
       body: Stack(
@@ -50,7 +51,7 @@ class DashboardView extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/game');
+                    navigationService.navigateTo('/game');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFA64D),
@@ -72,9 +73,7 @@ class DashboardView extends StatelessWidget {
                 TextButton(
                   onPressed: () async {
                     await localSource.clearUser();
-                    if (context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/login');
-                    }
+                    navigationService.navigateToReplacement('/login');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFA64D),
@@ -101,16 +100,16 @@ class DashboardView extends StatelessWidget {
                     children: [
                       _circleButton(
                         icon: Icons.person,
-                        onTap: () => Navigator.pushNamed(context, '/profile'),
+                        onTap: () => navigationService.navigateTo('/profile'),
                       ),
                       _circleButton(
                         icon: Icons.star,
                         onTap: () =>
-                            Navigator.pushNamed(context, '/achievements'),
+                            navigationService.navigateTo('/achievements'),
                       ),
                       _circleButton(
                         icon: Icons.settings,
-                        onTap: () => Navigator.pushNamed(context, '/settings'),
+                        onTap: () => navigationService.navigateTo('/settings'),
                       ),
                     ],
                   ),

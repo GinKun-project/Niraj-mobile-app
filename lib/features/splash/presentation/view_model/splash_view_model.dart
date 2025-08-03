@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/user_hive_model.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
 
 enum SplashStatus { checking, loggedIn, loggedOut }
 
 class SplashViewModel extends ChangeNotifier {
   final LocalUserDataSource _localUserDataSource = LocalUserDataSource();
+  final NavigationService _navigationService = getIt<NavigationService>();
 
   SplashStatus _status = SplashStatus.checking;
   SplashStatus get status => _status;
@@ -23,11 +25,14 @@ class SplashViewModel extends ChangeNotifier {
       if (storedUser != null && storedUser.token != null) {
         _user = storedUser;
         _status = SplashStatus.loggedIn;
+        _navigationService.navigateToReplacement('/dashboard');
       } else {
         _status = SplashStatus.loggedOut;
+        _navigationService.navigateToReplacement('/login');
       }
     } catch (e) {
       _status = SplashStatus.loggedOut;
+      _navigationService.navigateToReplacement('/login');
     }
 
     notifyListeners();

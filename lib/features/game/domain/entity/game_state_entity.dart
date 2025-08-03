@@ -6,12 +6,14 @@ class DamagePopup {
   final String text;
   final bool isCritical;
   final bool isHeal;
+  final bool isForPlayer;
   final DateTime timestamp;
 
   const DamagePopup({
     required this.text,
     this.isCritical = false,
     this.isHeal = false,
+    this.isForPlayer = false,
     required this.timestamp,
   });
 }
@@ -24,6 +26,7 @@ class GameStateEntity {
   final String? lastAction;
   final bool isPlayerTurn;
   final List<DamagePopup> damagePopups;
+  final bool showSensorAlert;
 
   const GameStateEntity({
     required this.player,
@@ -33,6 +36,7 @@ class GameStateEntity {
     this.lastAction,
     required this.isPlayerTurn,
     this.damagePopups = const [],
+    this.showSensorAlert = false,
   });
 
   GameStateEntity copyWith({
@@ -43,6 +47,7 @@ class GameStateEntity {
     String? lastAction,
     bool? isPlayerTurn,
     List<DamagePopup>? damagePopups,
+    bool? showSensorAlert,
   }) {
     return GameStateEntity(
       player: player ?? this.player,
@@ -52,6 +57,7 @@ class GameStateEntity {
       lastAction: lastAction ?? this.lastAction,
       isPlayerTurn: isPlayerTurn ?? this.isPlayerTurn,
       damagePopups: damagePopups ?? this.damagePopups,
+      showSensorAlert: showSensorAlert ?? this.showSensorAlert,
     );
   }
 }

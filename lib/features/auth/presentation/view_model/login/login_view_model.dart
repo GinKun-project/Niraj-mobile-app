@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shadow_clash_frontend/features/auth/domain/usecase/login_usecase.dart';
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/user_hive_model.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final LoginUseCase _loginUseCase;
   final LocalUserDataSource _localDataSource = LocalUserDataSource();
+  final NavigationService _navigationService = getIt<NavigationService>();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -42,9 +44,7 @@ class LoginViewModel extends ChangeNotifier {
       notifyListeners();
 
       if (_state.status == LoginStatus.success) {
-        if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/dashboard');
-        }
+        _navigationService.navigateToReplacement('/dashboard');
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(

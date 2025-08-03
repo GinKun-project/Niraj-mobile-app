@@ -3,11 +3,13 @@ import 'package:shadow_clash_frontend/features/auth/domain/usecase/signup_usecas
 import 'package:shadow_clash_frontend/features/auth/data/data_source/local_user_data_source.dart';
 import 'package:shadow_clash_frontend/features/auth/data/model/user_hive_model.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_event.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
 import 'signup_state.dart';
 
 class SignupViewModel extends ChangeNotifier {
   final SignupUseCase _signupUseCase;
   final LocalUserDataSource _localDataSource = LocalUserDataSource();
+  final NavigationService _navigationService = getIt<NavigationService>();
 
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
@@ -55,9 +57,7 @@ class SignupViewModel extends ChangeNotifier {
         );
         await _localDataSource.saveUser(user);
 
-        if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
-        }
+        _navigationService.navigateToReplacement('/login');
       } else {
         _state = _state.copyWith(
           status: SignupStatus.failure,
