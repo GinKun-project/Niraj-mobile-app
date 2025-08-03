@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
+import 'package:shadow_clash_frontend/features/game/data/repository/game_repository_impl.dart';
+import 'package:shadow_clash_frontend/features/dashboard/presentation/view_model/dashboard_view_model.dart';
 import 'package:shadow_clash_frontend/features/game/domain/entity/game_state_entity.dart';
 import 'package:shadow_clash_frontend/features/game/domain/entity/player_entity.dart';
 import 'package:shadow_clash_frontend/features/game/presentation/provider/game_provider.dart';
-import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
-import 'package:shadow_clash_frontend/features/game/data/repository/game_repository_impl.dart';
 
 class GameView extends ConsumerStatefulWidget {
   const GameView({super.key});
@@ -32,23 +33,20 @@ class _GameViewState extends ConsumerState<GameView> {
     final isLandscape = screenSize.width > screenSize.height;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF2C3E50),
-              const Color(0xFF34495E),
-              const Color(0xFF2C3E50),
-            ],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/arena.png',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: isLandscape
-              ? _buildLandscapeLayout(gameState, screenSize)
-              : _buildPortraitLayout(gameState, screenSize),
-        ),
+          SafeArea(
+            child: isLandscape
+                ? _buildLandscapeLayout(gameState, screenSize)
+                : _buildPortraitLayout(gameState, screenSize),
+          ),
+        ],
       ),
     );
   }
@@ -105,7 +103,7 @@ class _GameViewState extends ConsumerState<GameView> {
           if (gameState.status == GameStatus.playing)
             _buildActionButtons(gameState, screenSize),
           if (gameState.status != GameStatus.playing)
-            _buildGameOver(gameState.status, screenSize),
+            _buildGameOver(gameState, screenSize),
         ],
       ),
     );
@@ -164,9 +162,8 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         'SHADOW CLASH',
         style: TextStyle(
-          fontSize: isLandscape
-              ? screenSize.width * 0.04
-              : screenSize.width * 0.08,
+          fontSize:
+              isLandscape ? screenSize.width * 0.04 : screenSize.width * 0.08,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 4,
@@ -215,9 +212,8 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
         style: TextStyle(
-          fontSize: isLandscape
-              ? screenSize.width * 0.08
-              : screenSize.width * 0.12,
+          fontSize:
+              isLandscape ? screenSize.width * 0.08 : screenSize.width * 0.12,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 3,
@@ -261,9 +257,8 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         isPlayerTurn ? "PLAYER'S TURN" : "ENEMY'S TURN",
         style: TextStyle(
-          fontSize: isLandscape
-              ? screenSize.width * 0.025
-              : screenSize.width * 0.06,
+          fontSize:
+              isLandscape ? screenSize.width * 0.025 : screenSize.width * 0.06,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 2,
@@ -371,9 +366,8 @@ class _GameViewState extends ConsumerState<GameView> {
 
   Widget _buildCharacter(PlayerEntity player, bool isEnemy, Size screenSize) {
     final isLandscape = screenSize.width > screenSize.height;
-    final characterSize = isLandscape
-        ? screenSize.width * 0.15
-        : screenSize.width * 0.25;
+    final characterSize =
+        isLandscape ? screenSize.width * 0.15 : screenSize.width * 0.25;
     final isPlayer = !isEnemy;
 
     return Column(
@@ -531,9 +525,8 @@ class _GameViewState extends ConsumerState<GameView> {
         final age = DateTime.now().difference(popup.timestamp).inMilliseconds;
         final opacity = (2000 - age) / 2000.0;
 
-        final baseX = popup.isForPlayer
-            ? screenSize.width * 0.2
-            : screenSize.width * 0.7;
+        final baseX =
+            popup.isForPlayer ? screenSize.width * 0.2 : screenSize.width * 0.7;
         final baseY = screenSize.height * 0.3;
 
         return Positioned(
@@ -578,8 +571,8 @@ class _GameViewState extends ConsumerState<GameView> {
                   color: popup.isCritical
                       ? Colors.red.shade300
                       : popup.isHeal
-                      ? Colors.green.shade300
-                      : Colors.orange.shade300,
+                          ? Colors.green.shade300
+                          : Colors.orange.shade300,
                   shadows: [
                     Shadow(
                       color: Colors.black,
@@ -598,7 +591,7 @@ class _GameViewState extends ConsumerState<GameView> {
 
   Widget _buildBottomSection(GameStateEntity gameState, Size screenSize) {
     if (gameState.status != GameStatus.playing) {
-      return _buildGameOver(gameState.status, screenSize);
+      return _buildGameOver(gameState, screenSize);
     }
 
     return Container(
@@ -684,77 +677,69 @@ class _GameViewState extends ConsumerState<GameView> {
     );
   }
 
-  Widget _buildGameOver(GameStatus status, Size screenSize) {
-    String message;
-    Color color;
-
-    switch (status) {
-      case GameStatus.victory:
-        message = 'VICTORY!';
-        color = Colors.green.shade400;
-        break;
-      case GameStatus.defeat:
-        message = 'DEFEAT!';
-        color = Colors.red.shade400;
-        break;
-      case GameStatus.draw:
-        message = 'DRAW!';
-        color = Colors.orange.shade400;
-        break;
-      default:
-        message = '';
-        color = Colors.blue.shade400;
-    }
-
+  Widget _buildGameOver(GameStateEntity gameState, Size screenSize) {
     final isLandscape = screenSize.width > screenSize.height;
+    final isVictory =
+        gameState.player.currentHp > 0 && gameState.ai.currentHp <= 0;
 
-    return Container(
-      padding: EdgeInsets.all(screenSize.width * 0.08),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: screenSize.width * 0.1,
-              vertical: screenSize.height * 0.02,
-            ),
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.8),
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.all(screenSize.width * 0.05),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  color.withValues(alpha: 0.9),
-                  color.withValues(alpha: 0.7),
-                ],
+                colors: isVictory
+                    ? [Colors.green.shade400, Colors.green.shade600]
+                    : [Colors.red.shade400, Colors.red.shade600],
               ),
-              borderRadius: BorderRadius.circular(screenSize.width * 0.05),
+              borderRadius: BorderRadius.circular(screenSize.width * 0.04),
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: 0.4),
+                  color: (isVictory ? Colors.green : Colors.red)
+                      .withValues(alpha: 0.5),
                   blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: Text(
-              message,
-              style: TextStyle(
-                fontSize: isLandscape
-                    ? screenSize.width * 0.04
-                    : screenSize.width * 0.08,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 3,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 3,
-                    offset: const Offset(2, 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isVictory ? Icons.emoji_events : Icons.sports_kabaddi,
+                  color: Colors.white,
+                  size: isLandscape
+                      ? screenSize.width * 0.08
+                      : screenSize.width * 0.15,
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+                Text(
+                  isVictory ? 'VICTORY!' : 'DEFEAT!',
+                  style: TextStyle(
+                    fontSize: isLandscape
+                        ? screenSize.width * 0.04
+                        : screenSize.width * 0.08,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 3,
+                    fontFamily: 'Orbitron',
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.8),
+                        blurRadius: 3,
+                        offset: const Offset(2, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+                _buildBackButton(screenSize),
+              ],
             ),
           ),
-          SizedBox(height: screenSize.height * 0.04),
-          _buildBackButton(screenSize),
-        ],
+        ),
       ),
     );
   }
@@ -762,53 +747,46 @@ class _GameViewState extends ConsumerState<GameView> {
   Widget _buildBackButton(Size screenSize) {
     final isLandscape = screenSize.width > screenSize.height;
 
-    return Container(
-      width: isLandscape ? screenSize.width * 0.25 : screenSize.width * 0.5,
-      height: isLandscape ? screenSize.height * 0.1 : screenSize.height * 0.06,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0.1),
+    return GestureDetector(
+      onTap: () {
+        final dashboardViewModel = getIt<DashboardViewModel>();
+        dashboardViewModel.showGameEndNotification();
+        getIt<NavigationService>().navigateToAndClear('/dashboard');
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.04,
+          vertical: screenSize.height * 0.015,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade400, Colors.cyan.shade400],
+          ),
+          borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.withValues(alpha: 0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.05),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(screenSize.width * 0.05),
-          onTap: () => _navigationService.goBack(),
-          child: Center(
-            child: Text(
-              'Back to Dashboard',
-              style: TextStyle(
-                fontSize: isLandscape
-                    ? screenSize.width * 0.02
-                    : screenSize.width * 0.04,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 1,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 2,
-                    offset: const Offset(1, 1),
-                  ),
-                ],
+        child: Text(
+          'BACK TO DASHBOARD',
+          style: TextStyle(
+            fontSize:
+                isLandscape ? screenSize.width * 0.02 : screenSize.width * 0.04,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: 1,
+            fontFamily: 'Orbitron',
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.8),
+                blurRadius: 2,
+                offset: const Offset(1, 1),
               ),
-            ),
+            ],
           ),
         ),
       ),

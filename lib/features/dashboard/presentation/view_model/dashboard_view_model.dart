@@ -9,22 +9,26 @@ class DashboardState {
   final DashboardStatus status;
   final bool isSoundEnabled;
   final String? errorMessage;
+  final bool showNotification;
 
   const DashboardState({
     this.status = DashboardStatus.initial,
     this.isSoundEnabled = true,
     this.errorMessage,
+    this.showNotification = false,
   });
 
   DashboardState copyWith({
     DashboardStatus? status,
     bool? isSoundEnabled,
     String? errorMessage,
+    bool? showNotification,
   }) {
     return DashboardState(
       status: status ?? this.status,
       isSoundEnabled: isSoundEnabled ?? this.isSoundEnabled,
       errorMessage: errorMessage ?? this.errorMessage,
+      showNotification: showNotification ?? this.showNotification,
     );
   }
 }
@@ -47,10 +51,16 @@ class DashboardViewModel extends ChangeNotifier {
 
   void toggleSound() {
     _state = _state.copyWith(isSoundEnabled: !_state.isSoundEnabled);
+    if (_state.isSoundEnabled) {
+      _audioService.playBackgroundMusic();
+    } else {
+      _audioService.stopBackgroundMusic();
+    }
     notifyListeners();
   }
 
-  void logout() {
+  void logout() async {
+    await _audioService.stopBackgroundMusic();
     _navigationService.navigateToAndClear('/login');
   }
 
@@ -70,5 +80,15 @@ class DashboardViewModel extends ChangeNotifier {
 
   void navigateToAchievements() {
     _navigationService.navigateTo('/achievements');
+  }
+
+  void showGameEndNotification() {
+    _state = _state.copyWith(showNotification: true);
+    notifyListeners();
+    
+    Future.delayed(const Duration(seconds: 3), () {
+      _state = _state.copyWith(showNotification: false);
+      notifyListeners();
+    });
   }
 }

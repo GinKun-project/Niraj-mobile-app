@@ -23,32 +23,22 @@ class NavigationService {
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  NavigatorState? get navigator => navigatorKey.currentState;
+  NavigatorState get navigator => navigatorKey.currentState!;
 
-  Future<dynamic> navigateTo(String routeName, {Object? arguments}) {
-    return navigator!.pushNamed(routeName, arguments: arguments);
+  void navigateTo(String routeName) {
+    navigator.pushNamed(routeName);
   }
 
-  Future<dynamic> navigateToReplacement(String routeName, {Object? arguments}) {
-    return navigator!.pushReplacementNamed(routeName, arguments: arguments);
+  void navigateToReplacement(String routeName) {
+    navigator.pushReplacementNamed(routeName);
   }
 
-  Future<dynamic> navigateToAndClear(String routeName, {Object? arguments}) {
-    return navigator!.pushNamedAndRemoveUntil(
-      routeName,
-      (route) => false,
-      arguments: arguments,
-    );
+  void navigateToAndClear(String routeName) {
+    navigator.pushNamedAndRemoveUntil(routeName, (route) => false);
   }
 
   void goBack() {
-    if (navigator!.canPop()) {
-      navigator!.pop();
-    }
-  }
-
-  void goBackTo(String routeName) {
-    navigator!.popUntil((route) => route.settings.name == routeName);
+    navigator.pop();
   }
 }
 
@@ -66,10 +56,10 @@ Future<void> setupServiceLocator() async {
     () => AuthRepositoryImpl(getIt()),
   );
 
+  getIt.registerLazySingleton<GameRepository>(() => GameRepositoryImpl());
+
   getIt.registerLazySingleton<LoginUseCase>(() => LoginUseCase(getIt()));
   getIt.registerLazySingleton<SignupUseCase>(() => SignupUseCase(getIt()));
-
-  getIt.registerLazySingleton<GameRepository>(() => GameRepositoryImpl());
 
   getIt.registerFactory(() => LoginViewModel(getIt()));
   getIt.registerFactory(() => SignupViewModel(getIt()));

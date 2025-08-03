@@ -33,21 +33,59 @@ class App extends StatelessWidget {
             builder: (context, child) => const SplashView(),
           );
         },
-
         '/login': (context) => provider.ChangeNotifierProvider(
-          create: (_) => getIt<LoginViewModel>(),
-          child: const LoginView(),
-        ),
+              create: (_) => getIt<LoginViewModel>(),
+              child: const LoginView(),
+            ),
         '/signup': (context) => provider.ChangeNotifierProvider(
-          create: (_) => getIt<SignupViewModel>(),
-          child: const SignupView(),
-        ),
+              create: (_) => getIt<SignupViewModel>(),
+              child: const SignupView(),
+            ),
         '/dashboard': (context) => provider.ChangeNotifierProvider(
-          create: (_) => getIt<DashboardViewModel>(),
-          child: const DashboardView(),
-        ),
+              create: (_) => getIt<DashboardViewModel>(),
+              child: const DashboardView(),
+            ),
         '/game': (context) => const ProviderScope(child: GameView()),
+        '/settings': (context) => const SettingsView(),
+        '/profile': (context) => const ProfileView(),
+        '/achievements': (context) => const AchievementsView(),
       },
+    );
+  }
+}
+
+class SettingsView extends StatelessWidget {
+  const SettingsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: const Center(child: Text('Settings Screen')),
+    );
+  }
+}
+
+class ProfileView extends StatelessWidget {
+  const ProfileView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: const Center(child: Text('Profile Screen')),
+    );
+  }
+}
+
+class AchievementsView extends StatelessWidget {
+  const AchievementsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Achievements')),
+      body: const Center(child: Text('Achievements Screen')),
     );
   }
 }
