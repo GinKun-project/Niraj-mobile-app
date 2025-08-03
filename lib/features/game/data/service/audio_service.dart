@@ -1,5 +1,4 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 class AudioService {
   static final AudioService _instance = AudioService._internal();
@@ -47,7 +46,7 @@ class AudioService {
     await _effectPlayer.play(AssetSource('sounds/notification.mp3'));
   }
 
-  Future<void> playSensorAlert() async {
+  Future<void> playFightersReady() async {
     await _sensorPlayer.play(AssetSource('sounds/notification.mp3'));
   }
 

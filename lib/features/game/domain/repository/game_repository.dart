@@ -7,6 +7,6 @@ abstract class GameRepository {
   Future<GameStateEntity> updateTimer(GameStateEntity currentState);
   Future<void> playMenuSelect();
   Future<void> playTurnNotification();
-  Future<void> playSensorAlert();
+  Future<void> playFightersReady();
   Future<void> stopBackgroundMusic();
 }

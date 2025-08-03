@@ -29,6 +29,7 @@ class _GameViewState extends ConsumerState<GameView> {
   Widget build(BuildContext context) {
     final gameState = ref.watch(gameProvider);
     final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
 
     return Scaffold(
       body: Container(
@@ -44,84 +45,100 @@ class _GameViewState extends ConsumerState<GameView> {
           ),
         ),
         child: SafeArea(
-          child: Stack(
+          child: isLandscape
+              ? _buildLandscapeLayout(gameState, screenSize)
+              : _buildPortraitLayout(gameState, screenSize),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout(GameStateEntity gameState, Size screenSize) {
+    return Column(
+      children: [
+        _buildTopSection(gameState, screenSize),
+        Expanded(child: _buildBattlefield(gameState, screenSize)),
+        _buildBottomSection(gameState, screenSize),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeLayout(GameStateEntity gameState, Size screenSize) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Column(
             children: [
-              Column(
-                children: [
-                  _buildTopSection(gameState, screenSize),
-                  Expanded(child: _buildBattlefield(gameState, screenSize)),
-                  _buildBottomSection(gameState, screenSize),
-                ],
-              ),
-              if (gameState.showSensorAlert) _buildSensorAlert(screenSize),
+              _buildTopSection(gameState, screenSize),
+              Expanded(child: _buildBattlefield(gameState, screenSize)),
             ],
           ),
         ),
-      ),
+        Expanded(flex: 1, child: _buildSidePanel(gameState, screenSize)),
+      ],
     );
   }
 
-  Widget _buildSensorAlert(Size screenSize) {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.5),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: screenSize.width * 0.1,
-              vertical: screenSize.height * 0.02,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.red.shade400, Colors.orange.shade400],
-              ),
-              borderRadius: BorderRadius.circular(screenSize.width * 0.04),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.red.withValues(alpha: 0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Text(
-              'SENSOR ALERT!',
-              style: TextStyle(
-                fontSize: screenSize.width * 0.08,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 3,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 3,
-                    offset: const Offset(2, 2),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  Widget _buildSidePanel(GameStateEntity gameState, Size screenSize) {
+    return Container(
+      margin: EdgeInsets.all(screenSize.width * 0.02),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(screenSize.width * 0.02),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 2,
         ),
       ),
-    );
-  }
-
-  Widget _buildTopSection(GameStateEntity gameState, Size screenSize) {
-    return Container(
-      padding: EdgeInsets.all(screenSize.width * 0.04),
       child: Column(
         children: [
-          _buildTitle(screenSize),
-          SizedBox(height: screenSize.height * 0.02),
           _buildTimer(gameState.timeRemaining, screenSize),
           SizedBox(height: screenSize.height * 0.02),
           _buildTurnIndicator(gameState.isPlayerTurn, screenSize),
+          SizedBox(height: screenSize.height * 0.02),
+          if (gameState.status == GameStatus.playing)
+            _buildActionButtons(gameState, screenSize),
+          if (gameState.status != GameStatus.playing)
+            _buildGameOver(gameState.status, screenSize),
         ],
       ),
     );
   }
 
+  Widget _buildTopSection(GameStateEntity gameState, Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+
+    return Container(
+      padding: EdgeInsets.all(screenSize.width * 0.04),
+      child: isLandscape
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildTitle(screenSize),
+                _buildTimer(gameState.timeRemaining, screenSize),
+              ],
+            )
+          : Column(
+              children: [
+                _buildTitle(screenSize),
+                SizedBox(height: screenSize.height * 0.02),
+                _buildTimer(gameState.timeRemaining, screenSize),
+                SizedBox(height: screenSize.height * 0.02),
+                _buildTurnIndicator(gameState.isPlayerTurn, screenSize),
+              ],
+            ),
+    );
+  }
+
   Widget _buildTitle(Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: screenSize.width * 0.06,
@@ -147,7 +164,9 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         'SHADOW CLASH',
         style: TextStyle(
-          fontSize: screenSize.width * 0.08,
+          fontSize: isLandscape
+              ? screenSize.width * 0.04
+              : screenSize.width * 0.08,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 4,
@@ -166,6 +185,7 @@ class _GameViewState extends ConsumerState<GameView> {
   Widget _buildTimer(int timeRemaining, Size screenSize) {
     final minutes = timeRemaining ~/ 60;
     final seconds = timeRemaining % 60;
+    final isLandscape = screenSize.width > screenSize.height;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -195,7 +215,9 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
         style: TextStyle(
-          fontSize: screenSize.width * 0.12,
+          fontSize: isLandscape
+              ? screenSize.width * 0.08
+              : screenSize.width * 0.12,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 3,
@@ -212,6 +234,8 @@ class _GameViewState extends ConsumerState<GameView> {
   }
 
   Widget _buildTurnIndicator(bool isPlayerTurn, Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: screenSize.width * 0.06,
@@ -237,7 +261,9 @@ class _GameViewState extends ConsumerState<GameView> {
       child: Text(
         isPlayerTurn ? "PLAYER'S TURN" : "ENEMY'S TURN",
         style: TextStyle(
-          fontSize: screenSize.width * 0.06,
+          fontSize: isLandscape
+              ? screenSize.width * 0.025
+              : screenSize.width * 0.06,
           fontWeight: FontWeight.w900,
           color: Colors.white,
           letterSpacing: 2,
@@ -290,15 +316,18 @@ class _GameViewState extends ConsumerState<GameView> {
   }
 
   Widget _buildGrid(Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+    final crossAxisCount = isLandscape ? 6 : 4;
+
     return Container(
       margin: EdgeInsets.all(screenSize.width * 0.02),
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 2,
           mainAxisSpacing: 2,
         ),
-        itemCount: 12,
+        itemCount: crossAxisCount * 3,
         itemBuilder: (context, index) {
           return Container(
             decoration: BoxDecoration(
@@ -316,22 +345,35 @@ class _GameViewState extends ConsumerState<GameView> {
   }
 
   Widget _buildCharacters(GameStateEntity gameState, Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Positioned.fill(
       child: Container(
         margin: EdgeInsets.all(screenSize.width * 0.05),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildCharacter(gameState.player, false, screenSize),
-            _buildCharacter(gameState.ai, true, screenSize),
-          ],
-        ),
+        child: isLandscape
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildCharacter(gameState.player, false, screenSize),
+                  _buildCharacter(gameState.ai, true, screenSize),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildCharacter(gameState.player, false, screenSize),
+                  _buildCharacter(gameState.ai, true, screenSize),
+                ],
+              ),
       ),
     );
   }
 
   Widget _buildCharacter(PlayerEntity player, bool isEnemy, Size screenSize) {
-    final characterSize = screenSize.width * 0.25;
+    final isLandscape = screenSize.width > screenSize.height;
+    final characterSize = isLandscape
+        ? screenSize.width * 0.15
+        : screenSize.width * 0.25;
     final isPlayer = !isEnemy;
 
     return Column(
@@ -392,7 +434,9 @@ class _GameViewState extends ConsumerState<GameView> {
           child: Text(
             isPlayer ? 'Player' : 'ENEMY',
             style: TextStyle(
-              fontSize: screenSize.width * 0.05,
+              fontSize: isLandscape
+                  ? screenSize.width * 0.025
+                  : screenSize.width * 0.05,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               letterSpacing: 1,
@@ -412,7 +456,9 @@ class _GameViewState extends ConsumerState<GameView> {
         Text(
           '${player.currentHp}/${player.maxHp} HP',
           style: TextStyle(
-            fontSize: screenSize.width * 0.035,
+            fontSize: isLandscape
+                ? screenSize.width * 0.02
+                : screenSize.width * 0.035,
             color: Colors.white.withValues(alpha: 0.9),
             fontWeight: FontWeight.w700,
             shadows: [
@@ -431,6 +477,7 @@ class _GameViewState extends ConsumerState<GameView> {
   Widget _buildHealthBar(PlayerEntity player, Size screenSize, bool isPlayer) {
     final healthPercentage = player.healthPercentage;
     final isLowHealth = healthPercentage <= 0.2;
+    final isLandscape = screenSize.width > screenSize.height;
 
     Color barColor;
     if (isLowHealth) {
@@ -442,7 +489,7 @@ class _GameViewState extends ConsumerState<GameView> {
     }
 
     return Container(
-      width: screenSize.width * 0.3,
+      width: isLandscape ? screenSize.width * 0.12 : screenSize.width * 0.3,
       height: screenSize.height * 0.025,
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.3),
@@ -581,9 +628,11 @@ class _GameViewState extends ConsumerState<GameView> {
   }
 
   Widget _buildActionButton(String text, Size screenSize, VoidCallback onTap) {
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Container(
-      width: screenSize.width * 0.35,
-      height: screenSize.height * 0.08,
+      width: isLandscape ? screenSize.width * 0.15 : screenSize.width * 0.35,
+      height: isLandscape ? screenSize.height * 0.15 : screenSize.height * 0.08,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -614,7 +663,9 @@ class _GameViewState extends ConsumerState<GameView> {
             child: Text(
               text,
               style: TextStyle(
-                fontSize: screenSize.width * 0.045,
+                fontSize: isLandscape
+                    ? screenSize.width * 0.025
+                    : screenSize.width * 0.045,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 2,
@@ -655,6 +706,8 @@ class _GameViewState extends ConsumerState<GameView> {
         color = Colors.blue.shade400;
     }
 
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Container(
       padding: EdgeInsets.all(screenSize.width * 0.08),
       child: Column(
@@ -683,7 +736,9 @@ class _GameViewState extends ConsumerState<GameView> {
             child: Text(
               message,
               style: TextStyle(
-                fontSize: screenSize.width * 0.08,
+                fontSize: isLandscape
+                    ? screenSize.width * 0.04
+                    : screenSize.width * 0.08,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 3,
@@ -705,9 +760,11 @@ class _GameViewState extends ConsumerState<GameView> {
   }
 
   Widget _buildBackButton(Size screenSize) {
+    final isLandscape = screenSize.width > screenSize.height;
+
     return Container(
-      width: screenSize.width * 0.5,
-      height: screenSize.height * 0.06,
+      width: isLandscape ? screenSize.width * 0.25 : screenSize.width * 0.5,
+      height: isLandscape ? screenSize.height * 0.1 : screenSize.height * 0.06,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -737,7 +794,9 @@ class _GameViewState extends ConsumerState<GameView> {
             child: Text(
               'Back to Dashboard',
               style: TextStyle(
-                fontSize: screenSize.width * 0.04,
+                fontSize: isLandscape
+                    ? screenSize.width * 0.02
+                    : screenSize.width * 0.04,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 1,

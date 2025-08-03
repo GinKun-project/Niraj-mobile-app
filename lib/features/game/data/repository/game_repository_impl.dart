@@ -199,8 +199,8 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<void> playSensorAlert() async {
-    await _audioService.playSensorAlert();
+  Future<void> playFightersReady() async {
+    await _audioService.playFightersReady();
   }
 
   @override

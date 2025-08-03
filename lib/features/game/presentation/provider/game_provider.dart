@@ -6,7 +6,6 @@ import 'package:shadow_clash_frontend/features/game/domain/entity/player_entity.
 import 'package:shadow_clash_frontend/features/game/domain/usecase/ai_turn_usecase.dart';
 import 'package:shadow_clash_frontend/features/game/domain/usecase/initialize_game_usecase.dart';
 import 'package:shadow_clash_frontend/features/game/domain/usecase/player_attack_usecase.dart';
-import 'package:shadow_clash_frontend/features/game/data/service/sensor_service.dart';
 
 final gameProvider = StateNotifierProvider<GameNotifier, GameStateEntity>((
   ref,
@@ -38,10 +37,8 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
   final InitializeGameUseCase _initializeGameUseCase;
   final PlayerAttackUseCase _playerAttackUseCase;
   final AiTurnUseCase _aiTurnUseCase;
-  final SensorService _sensorService = SensorService();
   Timer? _timer;
   Timer? _popupTimer;
-  StreamSubscription<bool>? _shakeSubscription;
 
   GameNotifier(
     this._initializeGameUseCase,
@@ -82,7 +79,6 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
     state = gameState;
     _startTimer();
     _startPopupTimer();
-    _startSensorListening();
   }
 
   Future<void> playerAttack() async {
@@ -157,29 +153,10 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
     });
   }
 
-  void _startSensorListening() {
-    _sensorService.startListening();
-    _shakeSubscription = _sensorService.shakeStream.listen((_) {
-      _handleSensorAlert();
-    });
-  }
-
-  Future<void> _handleSensorAlert() async {
-    final repository = GameRepositoryImpl();
-    await repository.playSensorAlert();
-    state = state.copyWith(showSensorAlert: true);
-
-    Timer(const Duration(seconds: 2), () {
-      state = state.copyWith(showSensorAlert: false);
-    });
-  }
-
   @override
   void dispose() {
     _timer?.cancel();
     _popupTimer?.cancel();
-    _shakeSubscription?.cancel();
-    _sensorService.dispose();
     super.dispose();
   }
 }

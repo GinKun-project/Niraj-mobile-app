@@ -9,8 +9,10 @@ import 'package:shadow_clash_frontend/features/auth/domain/usecase/login_usecase
 import 'package:shadow_clash_frontend/features/auth/domain/usecase/signup_usecase.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/login/login_view_model.dart';
 import 'package:shadow_clash_frontend/features/auth/presentation/view_model/signup/signup_view_model.dart';
-import 'package:shadow_clash_frontend/features/splash/presentation/view_model/splash_view_model.dart';
 import 'package:shadow_clash_frontend/features/dashboard/presentation/view_model/dashboard_view_model.dart';
+import 'package:shadow_clash_frontend/features/splash/presentation/view_model/splash_view_model.dart';
+import 'package:shadow_clash_frontend/features/game/data/repository/game_repository_impl.dart';
+import 'package:shadow_clash_frontend/features/game/domain/repository/game_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -53,25 +55,22 @@ class NavigationService {
 Future<void> setupServiceLocator() async {
   await HiveService.initializeHive();
 
-  // Services
   getIt.registerLazySingleton<NavigationService>(() => NavigationService());
 
-  // Data Sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSource(),
   );
   getIt.registerLazySingleton<LocalUserDataSource>(() => LocalUserDataSource());
 
-  // Repository
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt()),
   );
 
-  // Use Cases
   getIt.registerLazySingleton<LoginUseCase>(() => LoginUseCase(getIt()));
   getIt.registerLazySingleton<SignupUseCase>(() => SignupUseCase(getIt()));
 
-  // ViewModels
+  getIt.registerLazySingleton<GameRepository>(() => GameRepositoryImpl());
+
   getIt.registerFactory(() => LoginViewModel(getIt()));
   getIt.registerFactory(() => SignupViewModel(getIt()));
   getIt.registerFactory(() => SplashViewModel());
