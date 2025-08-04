@@ -13,7 +13,7 @@ class GameRepositoryImpl implements GameRepository {
     await _audioService.initialize();
     await _audioService.playBackgroundMusic();
 
-    final player = PlayerEntity(
+    const player = PlayerEntity(
       name: 'Player',
       maxHp: 1200,
       currentHp: 1200,
@@ -25,7 +25,7 @@ class GameRepositoryImpl implements GameRepository {
       positionY: 2,
     );
 
-    final ai = PlayerEntity(
+    const ai = PlayerEntity(
       name: 'ENEMY',
       maxHp: 1200,
       currentHp: 1200,
@@ -189,6 +189,59 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
+  Future<GameStateEntity> playerSkill(GameStateEntity currentState) async {
+    if (!currentState.player.isAlive || !currentState.ai.isAlive) {
+      return currentState;
+    }
+
+    await _audioService.playSkillSound();
+
+    final ai = currentState.ai;
+    if (_random.nextDouble() < ai.dodgeChance) {
+      return currentState.copyWith(
+        lastAction: 'Enemy dodged!',
+        isPlayerTurn: false,
+        damagePopups: [
+          ...currentState.damagePopups,
+          DamagePopup(
+            text: 'DODGE!',
+            isForPlayer: false,
+            timestamp: DateTime.now(),
+          ),
+        ],
+      );
+    }
+
+    const isCritical = true; // Skills are always critical
+    final damage =
+        (currentState.player.attack * 2.5 - ai.defense * 0.2).round();
+    final finalDamage = damage.clamp(1, damage);
+    final newAiHp = (ai.currentHp - finalDamage).clamp(0, ai.maxHp);
+    final newAi = ai.copyWith(currentHp: newAiHp);
+
+    await _audioService.playImpact();
+
+    final action = '-$finalDamage SKILL!';
+    final status = newAiHp <= 0 ? GameStatus.victory : GameStatus.playing;
+
+    return currentState.copyWith(
+      ai: newAi,
+      lastAction: action,
+      status: status,
+      isPlayerTurn: false,
+      damagePopups: [
+        ...currentState.damagePopups,
+        DamagePopup(
+          text: action,
+          isCritical: isCritical,
+          isForPlayer: false,
+          timestamp: DateTime.now(),
+        ),
+      ],
+    );
+  }
+
+  @override
   Future<void> playMenuSelect() async {
     await _audioService.playMenuSelect();
   }
@@ -200,11 +253,19 @@ class GameRepositoryImpl implements GameRepository {
 
   @override
   Future<void> playFightersReady() async {
-    await _audioService.playFightersReady();
+    try {
+      await _audioService.playFightersReady();
+    } catch (e) {
+      print('Audio error: $e');
+    }
   }
 
   @override
   Future<void> stopBackgroundMusic() async {
-    await _audioService.stopBackgroundMusic();
+    try {
+      await _audioService.stopBackgroundMusic();
+    } catch (e) {
+      print('Audio error: $e');
+    }
   }
 }

@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
 import 'package:shadow_clash_frontend/features/game/data/repository/game_repository_impl.dart';
+import 'package:shadow_clash_frontend/features/game/data/service/audio_service.dart';
 import 'package:shadow_clash_frontend/features/game/domain/entity/game_state_entity.dart';
 import 'package:shadow_clash_frontend/features/game/domain/entity/player_entity.dart';
 import 'package:shadow_clash_frontend/features/game/domain/usecase/ai_turn_usecase.dart';
 import 'package:shadow_clash_frontend/features/game/domain/usecase/initialize_game_usecase.dart';
 import 'package:shadow_clash_frontend/features/game/domain/usecase/player_attack_usecase.dart';
+import 'package:shadow_clash_frontend/features/game/domain/usecase/player_skill_usecase.dart';
 
 final gameProvider = StateNotifierProvider<GameNotifier, GameStateEntity>((
   ref,
@@ -13,6 +17,7 @@ final gameProvider = StateNotifierProvider<GameNotifier, GameStateEntity>((
   return GameNotifier(
     ref.read(initializeGameUseCaseProvider),
     ref.read(playerAttackUseCaseProvider),
+    ref.read(playerSkillUseCaseProvider),
     ref.read(aiTurnUseCaseProvider),
   );
 });
@@ -23,6 +28,10 @@ final initializeGameUseCaseProvider = Provider<InitializeGameUseCase>((ref) {
 
 final playerAttackUseCaseProvider = Provider<PlayerAttackUseCase>((ref) {
   return PlayerAttackUseCase(ref.read(gameRepositoryProvider));
+});
+
+final playerSkillUseCaseProvider = Provider<PlayerSkillUseCase>((ref) {
+  return PlayerSkillUseCase(ref.read(gameRepositoryProvider));
 });
 
 final aiTurnUseCaseProvider = Provider<AiTurnUseCase>((ref) {
@@ -36,6 +45,7 @@ final gameRepositoryProvider = Provider((ref) {
 class GameNotifier extends StateNotifier<GameStateEntity> {
   final InitializeGameUseCase _initializeGameUseCase;
   final PlayerAttackUseCase _playerAttackUseCase;
+  final PlayerSkillUseCase _playerSkillUseCase;
   final AiTurnUseCase _aiTurnUseCase;
   Timer? _timer;
   Timer? _popupTimer;
@@ -43,36 +53,37 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
   GameNotifier(
     this._initializeGameUseCase,
     this._playerAttackUseCase,
+    this._playerSkillUseCase,
     this._aiTurnUseCase,
   ) : super(
-        GameStateEntity(
-          player: PlayerEntity(
-            name: 'Player',
-            maxHp: 1200,
-            currentHp: 1200,
-            attack: 140,
-            defense: 90,
-            criticalChance: 0.18,
-            dodgeChance: 0.12,
-            positionX: 0,
-            positionY: 2,
+          const GameStateEntity(
+            player: PlayerEntity(
+              name: 'Player',
+              maxHp: 1200,
+              currentHp: 1200,
+              attack: 140,
+              defense: 90,
+              criticalChance: 0.18,
+              dodgeChance: 0.12,
+              positionX: 0,
+              positionY: 2,
+            ),
+            ai: PlayerEntity(
+              name: 'ENEMY',
+              maxHp: 1200,
+              currentHp: 1200,
+              attack: 160,
+              defense: 100,
+              criticalChance: 0.22,
+              dodgeChance: 0.15,
+              positionX: 3,
+              positionY: 2,
+            ),
+            timeRemaining: 180,
+            status: GameStatus.playing,
+            isPlayerTurn: true,
           ),
-          ai: PlayerEntity(
-            name: 'ENEMY',
-            maxHp: 1200,
-            currentHp: 1200,
-            attack: 160,
-            defense: 100,
-            criticalChance: 0.22,
-            dodgeChance: 0.15,
-            positionX: 3,
-            positionY: 2,
-          ),
-          timeRemaining: 180,
-          status: GameStatus.playing,
-          isPlayerTurn: true,
-        ),
-      );
+        );
 
   Future<void> startGame() async {
     final gameState = await _initializeGameUseCase.execute();
@@ -95,11 +106,7 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
   Future<void> playerSkill() async {
     if (state.status != GameStatus.playing || !state.isPlayerTurn) return;
 
-    final skillState = state.copyWith(
-      player: state.player.copyWith(attack: state.player.attack * 2),
-    );
-
-    final newState = await _playerAttackUseCase.execute(skillState);
+    final newState = await _playerSkillUseCase.execute(state);
     state = newState;
 
     if (newState.status == GameStatus.playing && !newState.isPlayerTurn) {
@@ -110,6 +117,14 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
   Future<void> _aiTurn() async {
     final newState = await _aiTurnUseCase.execute(state);
     state = newState;
+
+    // Play turn notification sound when AI turn ends
+    try {
+      final audioService = getIt<AudioService>();
+      await audioService.playTurnNotification();
+    } catch (e) {
+      print('Turn notification error: $e');
+    }
   }
 
   void _startTimer() {
@@ -119,9 +134,11 @@ class GameNotifier extends StateNotifier<GameStateEntity> {
         timer.cancel();
         return;
       }
-      state = state.copyWith(timeRemaining: state.timeRemaining - 1);
 
-      if (state.timeRemaining <= 0) {
+      final newTimeRemaining = state.timeRemaining - 1;
+      state = state.copyWith(timeRemaining: newTimeRemaining);
+
+      if (newTimeRemaining <= 0) {
         final playerHp = state.player.currentHp;
         final aiHp = state.ai.currentHp;
 

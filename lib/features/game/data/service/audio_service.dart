@@ -19,35 +19,75 @@ class AudioService {
   }
 
   Future<void> playBackgroundMusic() async {
-    await _backgroundPlayer.play(AssetSource('sounds/backgound.wav'));
+    try {
+      await _backgroundPlayer.play(AssetSource('sounds/backgound.wav'));
+    } catch (e) {
+      print('Background music error: $e');
+    }
   }
 
   Future<void> stopBackgroundMusic() async {
-    await _backgroundPlayer.stop();
+    try {
+      await _backgroundPlayer.stop();
+    } catch (e) {
+      print('Stop background music error: $e');
+    }
   }
 
   Future<void> playSwordSwing() async {
-    await _effectPlayer.play(AssetSource('sounds/sword.wav'));
+    try {
+      await _effectPlayer.play(AssetSource('sounds/sword.wav'));
+    } catch (e) {
+      print('Sword swing error: $e');
+    }
   }
 
   Future<void> playCriticalHit() async {
-    await _effectPlayer.play(AssetSource('sounds/crit.mp3'));
+    try {
+      await _effectPlayer.play(AssetSource('sounds/crit.mp3'));
+    } catch (e) {
+      print('Critical hit error: $e');
+    }
   }
 
   Future<void> playImpact() async {
-    await _effectPlayer.play(AssetSource('sounds/impact.wav'));
+    try {
+      await _effectPlayer.play(AssetSource('sounds/impact.wav'));
+    } catch (e) {
+      print('Impact error: $e');
+    }
   }
 
   Future<void> playMenuSelect() async {
-    await _effectPlayer.play(AssetSource('sounds/menu.wav'));
+    try {
+      await _effectPlayer.play(AssetSource('sounds/menu.wav'));
+    } catch (e) {
+      print('Menu select error: $e');
+    }
   }
 
   Future<void> playTurnNotification() async {
-    await _effectPlayer.play(AssetSource('sounds/notification.mp3'));
+    try {
+      await _effectPlayer.play(AssetSource('sounds/notification.mp3'));
+    } catch (e) {
+      print('Turn notification error: $e');
+    }
+  }
+
+  Future<void> playSkillSound() async {
+    try {
+      await _effectPlayer.play(AssetSource('sounds/skill.wav'));
+    } catch (e) {
+      print('Skill sound error: $e');
+    }
   }
 
   Future<void> playFightersReady() async {
-    await _sensorPlayer.play(AssetSource('sounds/notification.mp3'));
+    try {
+      await _sensorPlayer.play(AssetSource('sounds/notification.mp3'));
+    } catch (e) {
+      print('Fighters ready error: $e');
+    }
   }
 
   void dispose() {

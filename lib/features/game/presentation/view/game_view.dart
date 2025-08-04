@@ -1,795 +1,761 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame/game.dart';
+import 'package:flame/components.dart';
+import 'package:flame/events.dart';
+import 'package:flame/input.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shadow_clash_frontend/app/service_locator/service_locator.dart';
-import 'package:shadow_clash_frontend/features/game/data/repository/game_repository_impl.dart';
-import 'package:shadow_clash_frontend/features/dashboard/presentation/view_model/dashboard_view_model.dart';
-import 'package:shadow_clash_frontend/features/game/domain/entity/game_state_entity.dart';
-import 'package:shadow_clash_frontend/features/game/domain/entity/player_entity.dart';
+import 'package:shadow_clash_frontend/features/game/data/service/audio_service.dart';
 import 'package:shadow_clash_frontend/features/game/presentation/provider/game_provider.dart';
+import 'package:shadow_clash_frontend/features/game/domain/entity/game_state_entity.dart';
 
-class GameView extends ConsumerStatefulWidget {
+class GameView extends ConsumerWidget {
   const GameView({super.key});
 
   @override
-  ConsumerState<GameView> createState() => _GameViewState();
-}
-
-class _GameViewState extends ConsumerState<GameView> {
-  late final NavigationService _navigationService;
-
-  @override
-  void initState() {
-    super.initState();
-    _navigationService = getIt<NavigationService>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(gameProvider.notifier).startGame();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final gameState = ref.watch(gameProvider);
-    final screenSize = MediaQuery.of(context).size;
-    final isLandscape = screenSize.width > screenSize.height;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gameNotifier = ref.read(gameProvider.notifier);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/arena.png',
-              fit: BoxFit.cover,
-            ),
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GameWidget(
+            game: BattleGame(gameNotifier: gameNotifier),
           ),
-          SafeArea(
-            child: isLandscape
-                ? _buildLandscapeLayout(gameState, screenSize)
-                : _buildPortraitLayout(gameState, screenSize),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPortraitLayout(GameStateEntity gameState, Size screenSize) {
-    return Column(
-      children: [
-        _buildTopSection(gameState, screenSize),
-        Expanded(child: _buildBattlefield(gameState, screenSize)),
-        _buildBottomSection(gameState, screenSize),
-      ],
-    );
-  }
-
-  Widget _buildLandscapeLayout(GameStateEntity gameState, Size screenSize) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              _buildTopSection(gameState, screenSize),
-              Expanded(child: _buildBattlefield(gameState, screenSize)),
-            ],
-          ),
-        ),
-        Expanded(flex: 1, child: _buildSidePanel(gameState, screenSize)),
-      ],
-    );
-  }
-
-  Widget _buildSidePanel(GameStateEntity gameState, Size screenSize) {
-    return Container(
-      margin: EdgeInsets.all(screenSize.width * 0.02),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.02),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        children: [
-          _buildTimer(gameState.timeRemaining, screenSize),
-          SizedBox(height: screenSize.height * 0.02),
-          _buildTurnIndicator(gameState.isPlayerTurn, screenSize),
-          SizedBox(height: screenSize.height * 0.02),
-          if (gameState.status == GameStatus.playing)
-            _buildActionButtons(gameState, screenSize),
-          if (gameState.status != GameStatus.playing)
-            _buildGameOver(gameState, screenSize),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopSection(GameStateEntity gameState, Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-
-    return Container(
-      padding: EdgeInsets.all(screenSize.width * 0.04),
-      child: isLandscape
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildTitle(screenSize),
-                _buildTimer(gameState.timeRemaining, screenSize),
-              ],
-            )
-          : Column(
-              children: [
-                _buildTitle(screenSize),
-                SizedBox(height: screenSize.height * 0.02),
-                _buildTimer(gameState.timeRemaining, screenSize),
-                SizedBox(height: screenSize.height * 0.02),
-                _buildTurnIndicator(gameState.isPlayerTurn, screenSize),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildTitle(Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenSize.width * 0.06,
-        vertical: screenSize.height * 0.01,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.purple.shade400,
-            Colors.blue.shade400,
-            Colors.purple.shade600,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.04),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Text(
-        'SHADOW CLASH',
-        style: TextStyle(
-          fontSize:
-              isLandscape ? screenSize.width * 0.04 : screenSize.width * 0.08,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-          letterSpacing: 4,
-          shadows: [
-            Shadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 3,
-              offset: const Offset(2, 2),
-            ),
-          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTimer(int timeRemaining, Size screenSize) {
-    final minutes = timeRemaining ~/ 60;
-    final seconds = timeRemaining % 60;
-    final isLandscape = screenSize.width > screenSize.height;
+class BattleGame extends FlameGame with TapCallbacks {
+  final GameNotifier gameNotifier;
+  late BattleBackgroundComponent background;
+  late PlayerComponent player;
+  late EnemyComponent enemy;
+  late HudComponent hud;
+  late ActionButtonsComponent actionButtons;
+  late TimerComponent timer;
+  late DamageEffectComponent damageEffects;
+  BattleEndOverlay? battleEndOverlay;
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenSize.width * 0.08,
-        vertical: screenSize.height * 0.015,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.06),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Text(
-        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-        style: TextStyle(
-          fontSize:
-              isLandscape ? screenSize.width * 0.08 : screenSize.width * 0.12,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-          letterSpacing: 3,
-          shadows: [
-            Shadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 2,
-              offset: const Offset(1, 1),
-            ),
-          ],
-        ),
-      ),
-    );
+  BattleGame({required this.gameNotifier});
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    background = BattleBackgroundComponent();
+    add(background);
+
+    player = PlayerComponent();
+    add(player);
+
+    enemy = EnemyComponent();
+    add(enemy);
+
+    hud = HudComponent();
+    add(hud);
+
+    actionButtons = ActionButtonsComponent();
+    add(actionButtons);
+
+    timer = TimerComponent();
+    add(timer);
+
+    damageEffects = DamageEffectComponent();
+    add(damageEffects);
+
+    try {
+      final audioService = getIt<AudioService>();
+      await audioService.initialize();
+      await audioService.playBackgroundMusic();
+      await audioService.playFightersReady();
+    } catch (e) {
+      print('Audio initialization error: $e');
+    }
+
+    await gameNotifier.startGame();
   }
 
-  Widget _buildTurnIndicator(bool isPlayerTurn, Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
+  @override
+  void update(double dt) {
+    super.update(dt);
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenSize.width * 0.06,
-        vertical: screenSize.height * 0.01,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isPlayerTurn
-              ? [Colors.blue.shade400, Colors.cyan.shade400]
-              : [Colors.red.shade400, Colors.orange.shade400],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.04),
-        boxShadow: [
-          BoxShadow(
-            color: (isPlayerTurn ? Colors.blue : Colors.red).withValues(
-              alpha: 0.3,
-            ),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Text(
-        isPlayerTurn ? "PLAYER'S TURN" : "ENEMY'S TURN",
-        style: TextStyle(
-          fontSize:
-              isLandscape ? screenSize.width * 0.025 : screenSize.width * 0.06,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-          letterSpacing: 2,
-          shadows: [
-            Shadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 2,
-              offset: const Offset(1, 1),
-            ),
-          ],
-        ),
-      ),
-    );
+    // Check if game has ended and show overlay
+    final gameState = gameNotifier.state;
+    if ((gameState.status == GameStatus.victory ||
+            gameState.status == GameStatus.defeat ||
+            gameState.status == GameStatus.draw) &&
+        battleEndOverlay == null) {
+      final isVictory = gameState.status == GameStatus.victory;
+      battleEndOverlay = BattleEndOverlay(gameStatus: gameState.status);
+      add(battleEndOverlay!);
+    }
+  }
+}
+
+class BattleBackgroundComponent extends SpriteComponent
+    with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    try {
+      sprite = await Sprite.load('arena.png');
+    } catch (e) {
+      print('Failed to load arena background: $e');
+    }
+    size = game.size;
+    position = Vector2.zero();
   }
 
-  Widget _buildBattlefield(GameStateEntity gameState, Size screenSize) {
-    return Container(
-      margin: EdgeInsets.all(screenSize.width * 0.05),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
-            Colors.white.withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.04),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          _buildGrid(screenSize),
-          _buildCharacters(gameState, screenSize),
-          _buildDamagePopups(gameState.damagePopups, screenSize),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGrid(Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-    final crossAxisCount = isLandscape ? 6 : 4;
-
-    return Container(
-      margin: EdgeInsets.all(screenSize.width * 0.02),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-        ),
-        itemCount: crossAxisCount * 3,
-        itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildCharacters(GameStateEntity gameState, Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-
-    return Positioned.fill(
-      child: Container(
-        margin: EdgeInsets.all(screenSize.width * 0.05),
-        child: isLandscape
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildCharacter(gameState.player, false, screenSize),
-                  _buildCharacter(gameState.ai, true, screenSize),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildCharacter(gameState.player, false, screenSize),
-                  _buildCharacter(gameState.ai, true, screenSize),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildCharacter(PlayerEntity player, bool isEnemy, Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-    final characterSize =
-        isLandscape ? screenSize.width * 0.15 : screenSize.width * 0.25;
-    final isPlayer = !isEnemy;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: characterSize,
-          height: characterSize,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.2),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(characterSize * 0.1),
-            border: Border.all(
-              color: isPlayer ? Colors.blue.shade400 : Colors.red.shade400,
-              width: 3,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: (isPlayer ? Colors.blue : Colors.red).withValues(
-                  alpha: 0.3,
-                ),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(characterSize * 0.1),
-            child: Image.asset(
-              isEnemy ? 'assets/images/Enemy.png' : 'assets/images/Player.png',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        SizedBox(height: screenSize.height * 0.02),
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenSize.width * 0.03,
-            vertical: screenSize.height * 0.005,
-          ),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.2),
-                Colors.white.withValues(alpha: 0.1),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(screenSize.width * 0.02),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            isPlayer ? 'Player' : 'ENEMY',
-            style: TextStyle(
-              fontSize: isLandscape
-                  ? screenSize.width * 0.025
-                  : screenSize.width * 0.05,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: 1,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  blurRadius: 2,
-                  offset: const Offset(1, 1),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: screenSize.height * 0.01),
-        _buildHealthBar(player, screenSize, isPlayer),
-        SizedBox(height: screenSize.height * 0.005),
-        Text(
-          '${player.currentHp}/${player.maxHp} HP',
-          style: TextStyle(
-            fontSize: isLandscape
-                ? screenSize.width * 0.02
-                : screenSize.width * 0.035,
-            color: Colors.white.withValues(alpha: 0.9),
-            fontWeight: FontWeight.w700,
-            shadows: [
-              Shadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 1,
-                offset: const Offset(1, 1),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHealthBar(PlayerEntity player, Size screenSize, bool isPlayer) {
-    final healthPercentage = player.healthPercentage;
-    final isLowHealth = healthPercentage <= 0.2;
-    final isLandscape = screenSize.width > screenSize.height;
-
-    Color barColor;
-    if (isLowHealth) {
-      barColor = Colors.red.shade400;
-    } else if (healthPercentage <= 0.5) {
-      barColor = Colors.orange.shade400;
+  @override
+  void render(Canvas canvas) {
+    if (sprite != null) {
+      super.render(canvas);
     } else {
-      barColor = isPlayer ? Colors.blue.shade400 : Colors.red.shade400;
+      canvas.drawColor(const Color(0xFF1a1a2e), BlendMode.src);
+    }
+  }
+}
+
+class PlayerComponent extends SpriteComponent
+    with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    try {
+      sprite = await Sprite.load('Player.png');
+    } catch (e) {
+      print('Failed to load player sprite: $e');
     }
 
-    return Container(
-      width: isLandscape ? screenSize.width * 0.12 : screenSize.width * 0.3,
-      height: screenSize.height * 0.025,
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(screenSize.height * 0.012),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: healthPercentage.clamp(0.0, 1.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [barColor, barColor.withValues(alpha: 0.8)],
-            ),
-            borderRadius: BorderRadius.circular(screenSize.height * 0.012),
-            boxShadow: [
-              BoxShadow(
-                color: barColor.withValues(alpha: 0.3),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    final isLandscape = game.size.x > game.size.y;
+    final spriteSize = isLandscape ? 100.0 : 120.0;
+
+    size = Vector2(spriteSize, spriteSize);
+    position = Vector2(isLandscape ? 50 : 80, game.size.y / 2 - spriteSize / 2);
   }
 
-  Widget _buildDamagePopups(List<DamagePopup> popups, Size screenSize) {
-    return Stack(
-      children: popups.map((popup) {
-        final age = DateTime.now().difference(popup.timestamp).inMilliseconds;
-        final opacity = (2000 - age) / 2000.0;
-
-        final baseX =
-            popup.isForPlayer ? screenSize.width * 0.2 : screenSize.width * 0.7;
-        final baseY = screenSize.height * 0.3;
-
-        return Positioned(
-          left: baseX + (popup.hashCode % 80),
-          top: baseY + (popup.hashCode % 40) - (age / 15),
-          child: Opacity(
-            opacity: opacity.clamp(0.0, 1.0),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize.width * 0.02,
-                vertical: screenSize.height * 0.005,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withValues(alpha: 0.8),
-                    Colors.black.withValues(alpha: 0.6),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(screenSize.width * 0.01),
-                border: Border.all(
-                  color: popup.isCritical
-                      ? Colors.red.shade400
-                      : Colors.orange.shade400,
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                popup.text,
-                style: TextStyle(
-                  fontSize: popup.isCritical
-                      ? screenSize.width * 0.05
-                      : screenSize.width * 0.04,
-                  fontWeight: FontWeight.w900,
-                  color: popup.isCritical
-                      ? Colors.red.shade300
-                      : popup.isHeal
-                          ? Colors.green.shade300
-                          : Colors.orange.shade300,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black,
-                      blurRadius: 3,
-                      offset: const Offset(1, 1),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
+  @override
+  void render(Canvas canvas) {
+    if (sprite != null) {
+      super.render(canvas);
+    } else {
+      final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+      final paint = Paint()..color = Colors.blue;
+      canvas.drawRect(rect, paint);
+    }
   }
+}
 
-  Widget _buildBottomSection(GameStateEntity gameState, Size screenSize) {
-    if (gameState.status != GameStatus.playing) {
-      return _buildGameOver(gameState, screenSize);
+class EnemyComponent extends SpriteComponent with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    try {
+      sprite = await Sprite.load('Enemy.png');
+    } catch (e) {
+      print('Failed to load enemy sprite: $e');
     }
 
-    return Container(
-      padding: EdgeInsets.all(screenSize.width * 0.04),
-      child: _buildActionButtons(gameState, screenSize),
-    );
+    final isLandscape = game.size.x > game.size.y;
+    final spriteSize = isLandscape ? 100.0 : 120.0;
+
+    size = Vector2(spriteSize, spriteSize);
+    position = Vector2(game.size.x - spriteSize - (isLandscape ? 50 : 80),
+        game.size.y / 2 - spriteSize / 2);
   }
 
-  Widget _buildActionButtons(GameStateEntity gameState, Size screenSize) {
-    if (!gameState.isPlayerTurn) return const SizedBox.shrink();
+  @override
+  void render(Canvas canvas) {
+    if (sprite != null) {
+      super.render(canvas);
+    } else {
+      final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+      final paint = Paint()..color = Colors.red;
+      canvas.drawRect(rect, paint);
+    }
+  }
+}
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildActionButton('ATTACK', screenSize, () async {
-          final repository = GameRepositoryImpl();
-          await repository.playMenuSelect();
-          ref.read(gameProvider.notifier).playerAttack();
-        }),
-        _buildActionButton('SKILL', screenSize, () async {
-          final repository = GameRepositoryImpl();
-          await repository.playMenuSelect();
-          ref.read(gameProvider.notifier).playerSkill();
-        }),
-      ],
-    );
+class HudComponent extends PositionComponent with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    size = Vector2(game.size.x, 120);
+    position = Vector2(0, 10);
   }
 
-  Widget _buildActionButton(String text, Size screenSize, VoidCallback onTap) {
-    final isLandscape = screenSize.width > screenSize.height;
+  @override
+  void render(Canvas canvas) {
+    final gameState = game.gameNotifier.state;
+    final playerHpPercent = gameState.player.currentHp / gameState.player.maxHp;
+    final enemyHpPercent = gameState.ai.currentHp / gameState.ai.maxHp;
 
-    return Container(
-      width: isLandscape ? screenSize.width * 0.15 : screenSize.width * 0.35,
-      height: isLandscape ? screenSize.height * 0.15 : screenSize.height * 0.08,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.purple.shade400,
-            Colors.blue.shade400,
-            Colors.purple.shade600,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(screenSize.width * 0.02),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(screenSize.width * 0.02),
-          onTap: onTap,
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: isLandscape
-                    ? screenSize.width * 0.025
-                    : screenSize.width * 0.045,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 2,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 2,
-                    offset: const Offset(1, 1),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    final playerHpColor = playerHpPercent > 0.5
+        ? Colors.green
+        : playerHpPercent > 0.25
+            ? Colors.orange
+            : Colors.red;
+    final enemyHpColor = enemyHpPercent > 0.5
+        ? Colors.red
+        : enemyHpPercent > 0.25
+            ? Colors.orange
+            : Colors.green;
 
-  Widget _buildGameOver(GameStateEntity gameState, Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
-    final isVictory =
-        gameState.player.currentHp > 0 && gameState.ai.currentHp <= 0;
+    final isLandscape = game.size.x > game.size.y;
 
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.8),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(screenSize.width * 0.05),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isVictory
-                    ? [Colors.green.shade400, Colors.green.shade600]
-                    : [Colors.red.shade400, Colors.red.shade600],
-              ),
-              borderRadius: BorderRadius.circular(screenSize.width * 0.04),
-              boxShadow: [
-                BoxShadow(
-                  color: (isVictory ? Colors.green : Colors.red)
-                      .withValues(alpha: 0.5),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isVictory ? Icons.emoji_events : Icons.sports_kabaddi,
-                  color: Colors.white,
-                  size: isLandscape
-                      ? screenSize.width * 0.08
-                      : screenSize.width * 0.15,
-                ),
-                SizedBox(height: screenSize.height * 0.02),
-                Text(
-                  isVictory ? 'VICTORY!' : 'DEFEAT!',
-                  style: TextStyle(
-                    fontSize: isLandscape
-                        ? screenSize.width * 0.04
-                        : screenSize.width * 0.08,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 3,
-                    fontFamily: 'Orbitron',
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.8),
-                        blurRadius: 3,
-                        offset: const Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: screenSize.height * 0.02),
-                _buildBackButton(screenSize),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+    // Responsive HP bar dimensions
+    final barWidth = isLandscape ? game.size.x * 0.15 : 180.0;
+    final barHeight = isLandscape ? 20.0 : 25.0;
+    final barSpacing = isLandscape ? game.size.x * 0.05 : 20.0;
+    final topMargin = isLandscape ? 10.0 : 20.0;
 
-  Widget _buildBackButton(Size screenSize) {
-    final isLandscape = screenSize.width > screenSize.height;
+    // Player HP Bar (Left side)
+    final playerBarX = barSpacing;
+    final playerBarY = topMargin;
 
-    return GestureDetector(
-      onTap: () {
-        final dashboardViewModel = getIt<DashboardViewModel>();
-        dashboardViewModel.showGameEndNotification();
-        getIt<NavigationService>().navigateToAndClear('/dashboard');
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenSize.width * 0.04,
-          vertical: screenSize.height * 0.015,
-        ),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade400, Colors.cyan.shade400],
-          ),
-          borderRadius: BorderRadius.circular(screenSize.width * 0.02),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.withValues(alpha: 0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Text(
-          'BACK TO DASHBOARD',
-          style: TextStyle(
-            fontSize:
-                isLandscape ? screenSize.width * 0.02 : screenSize.width * 0.04,
-            fontWeight: FontWeight.w900,
+    final playerBarRect =
+        Rect.fromLTWH(playerBarX, playerBarY, barWidth, barHeight);
+    final playerHpRect = Rect.fromLTWH(
+        playerBarX, playerBarY, barWidth * playerHpPercent, barHeight);
+
+    canvas.drawRect(
+        playerBarRect, Paint()..color = Colors.grey.withValues(alpha: 0.5));
+    canvas.drawRect(playerHpRect, Paint()..color = playerHpColor);
+    canvas.drawRect(
+        playerBarRect,
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2);
+
+    // Enemy HP Bar (Right side)
+    final enemyBarX = game.size.x - barWidth - barSpacing;
+    final enemyBarY = topMargin;
+
+    final enemyBarRect =
+        Rect.fromLTWH(enemyBarX, enemyBarY, barWidth, barHeight);
+    final enemyHpRect = Rect.fromLTWH(
+        enemyBarX, enemyBarY, barWidth * enemyHpPercent, barHeight);
+
+    canvas.drawRect(
+        enemyBarRect, Paint()..color = Colors.grey.withValues(alpha: 0.5));
+    canvas.drawRect(enemyHpRect, Paint()..color = enemyHpColor);
+    canvas.drawRect(
+        enemyBarRect,
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2);
+
+    // Player HP Text
+    final playerTextPainter = TextPainter(
+      text: TextSpan(
+        text: 'Player: ${gameState.player.currentHp}/${gameState.player.maxHp}',
+        style: TextStyle(
             color: Colors.white,
-            letterSpacing: 1,
-            fontFamily: 'Orbitron',
-            shadows: [
+            fontSize: isLandscape ? 10 : 12,
+            fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    playerTextPainter.layout();
+    playerTextPainter.paint(
+        canvas, Offset(playerBarX, playerBarY + barHeight + 5));
+
+    // Enemy HP Text
+    final enemyTextPainter = TextPainter(
+      text: TextSpan(
+        text: 'Enemy: ${gameState.ai.currentHp}/${gameState.ai.maxHp}',
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: isLandscape ? 10 : 12,
+            fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    enemyTextPainter.layout();
+    enemyTextPainter.paint(
+        canvas, Offset(enemyBarX, enemyBarY + barHeight + 5));
+
+    // Turn indicator
+    final turnText = gameState.isPlayerTurn ? 'YOUR TURN' : 'ENEMY TURN';
+    final turnColor = gameState.isPlayerTurn ? Colors.green : Colors.red;
+
+    final turnTextPainter = TextPainter(
+      text: TextSpan(
+        text: turnText,
+        style: TextStyle(
+          color: turnColor,
+          fontSize: isLandscape ? game.size.x * 0.02 : 20,
+          fontWeight: FontWeight.bold,
+          shadows: const [
+            Shadow(
+              color: Colors.black,
+              blurRadius: 3,
+              offset: Offset(1, 1),
+            ),
+          ],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    turnTextPainter.layout();
+    turnTextPainter.paint(
+        canvas,
+        Offset(
+            (game.size.x - turnTextPainter.width) / 2, isLandscape ? 40 : 70));
+  }
+}
+
+class ActionButtonsComponent extends PositionComponent
+    with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    final isLandscape = game.size.x > game.size.y;
+
+    if (isLandscape) {
+      // Landscape: buttons at the bottom with more spacing
+      size = Vector2(game.size.x, 100);
+      position = Vector2(0, game.size.y - 120);
+    } else {
+      // Portrait: buttons at the bottom
+      size = Vector2(game.size.x, 120);
+      position = Vector2(0, game.size.y - 140);
+    }
+
+    final buttonSize = Vector2(120, isLandscape ? 50 : 60);
+    final spacing = isLandscape ? 60.0 : 40.0;
+
+    final buttons = [
+      ('ATTACK', Colors.red, () => _handleAttack()),
+      ('SKILL', Colors.purple, () => _handleSkill()),
+    ];
+
+    for (int i = 0; i < buttons.length; i++) {
+      final button = HudButtonComponent(
+        text: buttons[i].$1,
+        color: buttons[i].$2,
+        size: buttonSize,
+        onPressed: buttons[i].$3,
+      );
+      button.position = Vector2(
+        (game.size.x - (buttons.length * (buttonSize.x + spacing) - spacing)) /
+                2 +
+            i * (buttonSize.x + spacing),
+        isLandscape ? 25 : 30,
+      );
+      add(button);
+    }
+  }
+
+  void _handleAttack() async {
+    try {
+      final audioService = getIt<AudioService>();
+      await audioService.playMenuSelect();
+      await Future.delayed(const Duration(milliseconds: 100));
+      await audioService.playSwordSwing();
+
+      final gameState = game.gameNotifier.state;
+      const damage = 150;
+
+      await game.gameNotifier.playerAttack();
+      await audioService.playImpact();
+
+      // Show damage effect with actual damage from game state
+      final currentState = game.gameNotifier.state;
+      final actualDamage = gameState.ai.currentHp - currentState.ai.currentHp;
+
+      game.damageEffects.showDamageEffect(
+        position: Vector2(game.size.x / 2, game.size.y / 2),
+        damage: actualDamage > 0 ? actualDamage : damage,
+        isCritical: false,
+      );
+    } catch (e) {
+      print('Attack error: $e');
+    }
+  }
+
+  void _handleSkill() async {
+    try {
+      final audioService = getIt<AudioService>();
+      await audioService.playMenuSelect();
+      await Future.delayed(const Duration(milliseconds: 100));
+      await audioService.playSkillSound();
+
+      final gameState = game.gameNotifier.state;
+      const damage = 300;
+
+      await game.gameNotifier.playerSkill();
+      await audioService.playImpact();
+
+      // Show damage effect with actual damage from game state
+      final currentState = game.gameNotifier.state;
+      final actualDamage = gameState.ai.currentHp - currentState.ai.currentHp;
+
+      game.damageEffects.showDamageEffect(
+        position: Vector2(game.size.x / 2, game.size.y / 2),
+        damage: actualDamage > 0 ? actualDamage : damage,
+        isCritical: true,
+      );
+    } catch (e) {
+      print('Skill error: $e');
+    }
+  }
+}
+
+class DamageEffectComponent extends PositionComponent
+    with HasGameReference<BattleGame> {
+  final List<DamagePopup> damagePopups = [];
+
+  void showDamageEffect({
+    required Vector2 position,
+    required int damage,
+    required bool isCritical,
+  }) {
+    damagePopups.add(DamagePopup(
+      position: position,
+      damage: damage,
+      isCritical: isCritical,
+      life: 2.0,
+    ));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    for (int i = damagePopups.length - 1; i >= 0; i--) {
+      final popup = damagePopups[i];
+      popup.life -= dt;
+      popup.position.y -= 50 * dt;
+
+      if (popup.life <= 0) {
+        damagePopups.removeAt(i);
+      }
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    for (final popup in damagePopups) {
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: popup.isCritical
+              ? 'CRITICAL ${popup.damage}!'
+              : '${popup.damage}',
+          style: TextStyle(
+            color: popup.isCritical ? Colors.yellow : Colors.white,
+            fontSize: popup.isCritical ? 24 : 20,
+            fontWeight: FontWeight.bold,
+            shadows: const [
               Shadow(
-                color: Colors.black.withValues(alpha: 0.8),
-                blurRadius: 2,
-                offset: const Offset(1, 1),
+                color: Colors.black,
+                blurRadius: 3,
+                offset: Offset(1, 1),
               ),
             ],
           ),
         ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(popup.position.x - textPainter.width / 2, popup.position.y),
+      );
+    }
+  }
+}
+
+class DamagePopup {
+  Vector2 position;
+  int damage;
+  bool isCritical;
+  double life;
+
+  DamagePopup({
+    required this.position,
+    required this.damage,
+    required this.isCritical,
+    required this.life,
+  });
+}
+
+class TimerComponent extends PositionComponent
+    with HasGameReference<BattleGame> {
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    final isLandscape = game.size.x > game.size.y;
+
+    if (isLandscape) {
+      size = Vector2(game.size.x, 40);
+      position = Vector2(0, 80);
+    } else {
+      size = Vector2(game.size.x, 50);
+      position = Vector2(0, 140);
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final gameState = game.gameNotifier.state;
+    final minutes = gameState.timeRemaining ~/ 60;
+    final seconds = gameState.timeRemaining % 60;
+
+    final isLandscape = game.size.x > game.size.y;
+    final fontSize = isLandscape ? 20.0 : 24.0;
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text:
+            '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+          (size.x - textPainter.width) / 2, (size.y - textPainter.height) / 2),
+    );
+  }
+}
+
+class HudButtonComponent extends PositionComponent with TapCallbacks {
+  String text;
+  final Color color;
+  final VoidCallback onPressed;
+
+  HudButtonComponent({
+    required this.text,
+    required this.color,
+    required Vector2 size,
+    required this.onPressed,
+  }) : super(size: size);
+
+  @override
+  bool onTapDown(TapDownEvent event) {
+    onPressed();
+    return true;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(15)),
+      paint,
+    );
+
+    final borderPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(15)),
+      borderPaint,
+    );
+
+    final isLandscape =
+        size.x > size.y * 2; // Check if button is wider than tall
+    final fontSize = isLandscape ? 14.0 : 16.0;
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    textPainter.layout(minWidth: size.x);
+    textPainter.paint(
+      canvas,
+      Offset(
+          (size.x - textPainter.width) / 2, (size.y - textPainter.height) / 2),
+    );
+  }
+}
+
+class BattleEndOverlay extends PositionComponent
+    with HasGameReference<BattleGame> {
+  final GameStatus gameStatus;
+
+  BattleEndOverlay({required this.gameStatus});
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    size = game.size;
+    position = Vector2.zero();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    // Semi-transparent background
+    canvas.drawColor(Colors.black.withValues(alpha: 0.8), BlendMode.src);
+
+    final isLandscape = size.x > size.y;
+    final titleFontSize = isLandscape ? size.x * 0.06 : 48.0;
+    final buttonWidth = isLandscape ? size.x * 0.25 : 200.0;
+    final buttonHeight = isLandscape ? 50.0 : 60.0;
+
+    // Victory/Defeat/Draw text
+    String text;
+    Color color;
+
+    switch (gameStatus) {
+      case GameStatus.victory:
+        text = 'YOU WIN!';
+        color = Colors.green;
+        break;
+      case GameStatus.defeat:
+        text = 'YOU LOSE!';
+        color = Colors.red;
+        break;
+      case GameStatus.draw:
+        text = 'DRAW!';
+        color = Colors.yellow;
+        break;
+      default:
+        text = 'GAME OVER';
+        color = Colors.white;
+    }
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontSize: titleFontSize,
+          fontWeight: FontWeight.bold,
+          shadows: const [
+            Shadow(
+              color: Colors.black,
+              blurRadius: 5,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset((size.x - textPainter.width) / 2, size.y * 0.3),
+    );
+
+    // Back to Dashboard button
+    final buttonRect = Rect.fromLTWH(
+      (size.x - buttonWidth) / 2,
+      size.y * 0.5,
+      buttonWidth,
+      buttonHeight,
+    );
+
+    final buttonPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(buttonRect, const Radius.circular(15)),
+      buttonPaint,
+    );
+
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(buttonRect, const Radius.circular(15)),
+      borderPaint,
+    );
+
+    final buttonTextFontSize = isLandscape ? size.x * 0.02 : 16.0;
+    final buttonTextPainter = TextPainter(
+      text: TextSpan(
+        text: 'GO BACK TO DASHBOARD',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: buttonTextFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    buttonTextPainter.layout();
+    buttonTextPainter.paint(
+      canvas,
+      Offset(
+        buttonRect.left + (buttonRect.width - buttonTextPainter.width) / 2,
+        buttonRect.top + (buttonRect.height - buttonTextPainter.height) / 2,
       ),
     );
+  }
+
+  @override
+  bool onTapDown(TapDownEvent event) {
+    final isLandscape = size.x > size.y;
+    final buttonWidth = isLandscape ? size.x * 0.25 : 200.0;
+    final buttonHeight = isLandscape ? 50.0 : 60.0;
+
+    final buttonRect = Rect.fromLTWH(
+      (size.x - buttonWidth) / 2,
+      size.y * 0.5,
+      buttonWidth,
+      buttonHeight,
+    );
+
+    if (buttonRect.contains(event.localPosition.toOffset())) {
+      try {
+        final audioService = getIt<AudioService>();
+        audioService.stopBackgroundMusic();
+
+        final navigationService = getIt<NavigationService>();
+        if (navigationService.navigatorKey.currentState != null) {
+          navigationService.navigateToAndClear('/dashboard');
+        } else {
+          print('Navigation service not ready, using fallback');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            navigationService.navigatorKey.currentState
+                ?.pushNamedAndRemoveUntil('/dashboard', (route) => false);
+          });
+        }
+      } catch (e) {
+        print('Navigation error: $e');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          getIt<NavigationService>()
+              .navigatorKey
+              .currentState
+              ?.pushNamedAndRemoveUntil('/dashboard', (route) => false);
+        });
+      }
+      return true;
+    }
+    return false;
   }
 }

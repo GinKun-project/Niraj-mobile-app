@@ -25,14 +25,11 @@ class SplashViewModel extends ChangeNotifier {
       if (storedUser != null && storedUser.token != null) {
         _user = storedUser;
         _status = SplashStatus.loggedIn;
-        _navigationService.navigateToReplacement('/dashboard');
       } else {
         _status = SplashStatus.loggedOut;
-        _navigationService.navigateToReplacement('/login');
       }
     } catch (e) {
       _status = SplashStatus.loggedOut;
-      _navigationService.navigateToReplacement('/login');
     }
 
     notifyListeners();
